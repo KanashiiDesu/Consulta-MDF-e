@@ -7,7 +7,7 @@
   <link rel="icon" type="image/svg+xml" href='data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><defs><linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="%23004d38"/><stop offset="100%" stop-color="%23007a53"/></linearGradient></defs><path fill="url(%23grad)" d="M0 64C0 28.7 28.7 0 64 0L224 0l0 128c0 17.7 14.3 32 32 32l128 0 0 288c0 35.3-28.7 64-64 64L64 512c-35.3 0-64-28.7-64-64L0 64zm384 64l-128 0L256 0 384 128z"/></svg>'>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
   <style>
-    /* Estilos gerais */
+    /* Estilos gerais - MANTENHA COMO ESTÁ */
     * {
       box-sizing: border-box;
       margin: 0;
@@ -165,7 +165,7 @@
       font-weight: 400;
     }
 
-    /* Estilos para o scanner */
+    /* Estilos para o scanner - MANTENHA COMO ESTÁ */
     #scanner-container {
         display: none; /* Escondido por padrão */
         flex-direction: column;
@@ -274,7 +274,7 @@
     }
 
 
-    /* Media Queries para responsividade */
+    /* Media Queries para responsividade - MANTENHA COMO ESTÁ */
     @media (max-width: 600px) {
         .container {
             padding: 25px 20px;
@@ -384,6 +384,7 @@
 
   <script src="https://unpkg.com/jsqr@1.4.0/dist/jsQR.min.js"></script>
   <script>
+    // Funções de input e consulta manual (MANTENHA ESTAS)
     function somenteNumeros(event) {
       const input = event.target;
       input.value = input.value.replace(/\D/g, '');
@@ -425,7 +426,7 @@
       });
     }
 
-    // --- Funcionalidade da Câmera para Leitura de QR Code ---
+    // --- REVISÃO DA FUNCIONALIDADE DA CÂMERA PARA LEITURA DE QR CODE ---
     const btnScanMdfeQr = document.getElementById('scan-mdfe-qr');
     const scannerContainer = document.getElementById('scanner-container');
     const videoPreview = document.getElementById('video-preview');
@@ -435,122 +436,152 @@
     const grantPermissionBtn = document.getElementById('grant-permission-btn');
     const denyPermissionBtn = document.getElementById('deny-permission-btn');
 
-    let stream = null;
+    let videoStream = null; // Renomeado para maior clareza
     let animationFrameId = null;
-    let canvas = document.createElement('canvas');
-    let ctx = canvas.getContext('2d');
-    let scanAttemptCount = 0; // Para depuração
-    const MAX_SCAN_ATTEMPTS_BEFORE_FEEDBACK = 60; // 60 frames = aprox 1 segundo
+    const canvas = document.createElement('canvas'); // Criado uma vez
+    const ctx = canvas.getContext('2d');
+    
+    let lastScanTime = 0;
+    const SCAN_INTERVAL = 150; // Tentar ler a cada 150ms (otimização para evitar sobrecarga de CPU)
 
     // Função para extrair a chave do MDF-e de uma URL
     function extractMdfeKeyFromUrl(url) {
+      console.log("Tentando extrair chave de:", url);
       try {
         const urlObj = new URL(url);
         const chMDFe = urlObj.searchParams.get('chMDFe');
-        if (chMDFe && chMDFe.length === 44 && /^\d+$/.test(chMDFe)) { // Mais robusto para verificar se é só número
+        // Validar se chMDFe existe, tem 44 dígitos e é puramente numérico
+        if (chMDFe && chMDFe.length === 44 && /^\d{44}$/.test(chMDFe)) {
+          console.log("Chave MDF-e extraída:", chMDFe);
           return chMDFe;
         }
       } catch (e) {
-        // Ignora erros de URL inválida
-        console.warn("URL inválida ou sem chMDFe:", url, e);
+        console.warn("Erro ao parsear URL ou chMDFe inválido:", e, url);
       }
       return null;
     }
 
     async function startScanner() {
-        permissionDialog.style.display = 'none'; // Esconde o popup
+        console.log("Iniciando scanner...");
+        permissionDialog.style.display = 'none';
         scannerContainer.style.display = 'flex';
         scannerMessage.textContent = 'Iniciando câmera...';
-        scanAttemptCount = 0; // Resetar contador
 
         try {
-            stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } }); // Preferir câmera traseira
-            videoPreview.srcObject = stream;
-            videoPreview.setAttribute('playsinline', true); // Necessário para iOS
-            await videoPreview.play();
-            scannerMessage.textContent = 'Posicione o QR Code dentro do quadrado.';
-            requestAnimationFrame(tick);
+            // Solicita a câmera traseira preferencialmente
+            videoStream = await navigator.mediaDevices.getUserMedia({ 
+                video: { 
+                    facingMode: 'environment', 
+                    width: { ideal: 640 }, // Tentativa de resolução ideal para QR Codes
+                    height: { ideal: 480 }
+                } 
+            });
+            videoPreview.srcObject = videoStream;
+            videoPreview.setAttribute('playsinline', true); // Essencial para iOS
+            videoPreview.play(); // Inicia a reprodução do vídeo
+
+            // Esperar o vídeo estar pronto para desenhar no canvas
+            videoPreview.onloadedmetadata = () => {
+                console.log("Metadata do vídeo carregada. Dimensões:", videoPreview.videoWidth, "x", videoPreview.videoHeight);
+                canvas.width = videoPreview.videoWidth;
+                canvas.height = videoPreview.videoHeight;
+                scannerMessage.textContent = 'Posicione o QR Code dentro do quadrado.';
+                animationFrameId = requestAnimationFrame(tick);
+            };
+
         } catch (err) {
             console.error('Erro ao acessar a câmera:', err);
             scannerMessage.textContent = 'Erro ao acessar a câmera. Verifique as permissões.';
-            alert('Não foi possível acessar a câmera. Verifique as permissões do aplicativo.');
-            stopScanner(); // Garante que o container do scanner seja escondido
+            alert('Não foi possível acessar a câmera. Verifique as permissões do aplicativo. Erro: ' + err.name);
+            stopScanner();
         }
     }
 
     function tick() {
-        if (!stream || !videoPreview.srcObject) { // Verifica se o stream foi interrompido
-            return;
+        if (!videoStream || !videoPreview.srcObject || videoPreview.paused || videoPreview.ended) {
+            console.log("Tick parado: stream ou vídeo não estão ativos.");
+            return; // Garante que o loop pare se o vídeo não estiver ativo
         }
 
+        // Tentar escanear apenas em intervalos, para evitar sobrecarga de CPU e melhorar a detecção
+        const currentTime = performance.now();
+        if (currentTime - lastScanTime < SCAN_INTERVAL) {
+            animationFrameId = requestAnimationFrame(tick);
+            return;
+        }
+        lastScanTime = currentTime;
+
+        // Verifica se o vídeo tem dados suficientes para ser desenhado
         if (videoPreview.readyState === videoPreview.HAVE_ENOUGH_DATA) {
-            // Ajustar o canvas para a resolução real do vídeo
-            canvas.height = videoPreview.videoHeight;
-            canvas.width = videoPreview.videoWidth;
             ctx.drawImage(videoPreview, 0, 0, canvas.width, canvas.height);
             let imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
             let code = null;
+
             try {
+                // Tentar decodificar o QR Code
                 code = jsQR(imageData.data, imageData.width, imageData.height, {
-                    inversionAttempts: "dontInvert", // Tenta ler mesmo em cores invertidas, mas prioriza não inverter
+                    inversionAttempts: "dontInvert", // Pode tentar "attemptBoth" se "dontInvert" não funcionar
                 });
             } catch (e) {
-                console.error("Erro na decodificação do jsQR:", e);
-                // Não precisa parar, apenas logar o erro interno do jsQR
+                console.error("Erro interno do jsQR ao decodificar:", e);
+                // Não precisa parar, apenas logar o erro interno da biblioteca
             }
             
-            scanAttemptCount++;
-
             if (code) {
+                console.log("QR Code detectado! Conteúdo:", code.data);
                 let scannedData = code.data;
                 let mdfeKey = null;
 
-                // Tenta extrair a chave se for uma URL
+                // 1. Tentar extrair a chave se for uma URL
                 if (scannedData.startsWith('http://') || scannedData.startsWith('https://')) {
                     mdfeKey = extractMdfeKeyFromUrl(scannedData);
-                } else if (scannedData.length === 44 && /^\d+$/.test(scannedData)) { // Verifica se é só número
-                    // Se não for URL, verifica se já é a chave de 44 dígitos
+                }
+                
+                // 2. Se não extraiu de URL, verificar se já é a chave de 44 dígitos pura
+                if (!mdfeKey && scannedData.length === 44 && /^\d{44}$/.test(scannedData)) {
                     mdfeKey = scannedData;
                 }
 
                 if (mdfeKey) {
                     inputMdfe.value = mdfeKey;
                     alert('Chave MDF-e escaneada com sucesso!');
-                    stopScanner();
-                    btnConsultarMdfe.click(); // Consulta automaticamente após escanear
-                    return; // Parar o loop de animação
+                    stopScanner(); // Parar o scanner após sucesso
+                    btnConsultarMdfe.click(); // Opcional: consulta automaticamente
+                    return; // Importante para parar o loop de animação
                 } else {
-                    scannerMessage.textContent = 'QR Code detectado, mas não é uma chave MDF-e válida. Tente outro.';
+                    scannerMessage.textContent = 'QR Code detectado, mas o conteúdo não parece ser uma chave MDF-e válida.';
+                    console.log("Conteúdo do QR Code não validado como MDF-e:", scannedData);
                 }
             } else {
-                // Se nenhum QR Code foi detectado após X tentativas
-                if (scanAttemptCount > MAX_SCAN_ATTEMPTS_BEFORE_FEEDBACK) {
-                    scannerMessage.textContent = 'Nenhum QR Code detectado. Ajuste a distância, foco e iluminação.';
-                } else {
-                    scannerMessage.textContent = 'Posicione o QR Code dentro do quadrado.';
-                }
+                // Nenhum QR Code detectado neste frame
+                scannerMessage.textContent = 'Posicione o QR Code dentro do quadrado. Nenhum QR Code detectado.';
             }
+        } else {
+            scannerMessage.textContent = 'Carregando stream de vídeo...';
         }
-        animationFrameId = requestAnimationFrame(tick);
+        
+        animationFrameId = requestAnimationFrame(tick); // Continua o loop
     }
 
     function stopScanner() {
-        if (stream) {
-            stream.getTracks().forEach(track => track.stop());
-            stream = null;
+        console.log("Parando scanner.");
+        if (videoStream) {
+            videoStream.getTracks().forEach(track => track.stop());
+            videoStream = null; // Limpa a referência do stream
         }
         if (animationFrameId) {
             cancelAnimationFrame(animationFrameId);
             animationFrameId = null;
         }
         scannerContainer.style.display = 'none';
-        videoPreview.srcObject = null;
-        scanAttemptCount = 0; // Resetar contador ao parar
+        videoPreview.srcObject = null; // Desvincula o srcObject do vídeo
+        videoPreview.load(); // Garante que o vídeo seja resetado
+        scannerMessage.textContent = 'Aguardando câmera...'; // Resetar mensagem
     }
 
+    // Event Listeners
     btnScanMdfeQr.addEventListener('click', () => {
-        // Exibe o popup de permissão
-        permissionDialog.style.display = 'flex';
+        permissionDialog.style.display = 'flex'; // Mostra o diálogo de permissão
     });
 
     grantPermissionBtn.addEventListener('click', startScanner);
@@ -561,8 +592,9 @@
 
     stopScanBtn.addEventListener('click', stopScanner);
 
-    // Certifique-se de parar o scanner se o usuário sair da página (em navegadores)
+    // Garante que o scanner seja parado ao sair da página
     window.addEventListener('beforeunload', stopScanner);
+    window.addEventListener('pagehide', stopScanner); // Para SPA ou navegação back/forward
   </script>
 </body>
 </html>
