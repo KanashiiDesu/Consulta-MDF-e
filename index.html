@@ -380,6 +380,20 @@
     let canvas = document.createElement('canvas');
     let ctx = canvas.getContext('2d');
 
+    // Função para extrair a chave do MDF-e de uma URL
+    function extractMdfeKeyFromUrl(url) {
+      try {
+        const urlObj = new URL(url);
+        const chMDFe = urlObj.searchParams.get('chMDFe');
+        if (chMDFe && chMDFe.length === 44 && !isNaN(chMDFe)) {
+          return chMDFe;
+        }
+      } catch (e) {
+        // Ignora erros de URL inválida
+      }
+      return null;
+    }
+
     async function startScanner() {
         permissionDialog.style.display = 'none'; // Esconde o popup
         scannerContainer.style.display = 'flex';
@@ -411,11 +425,22 @@
             });
 
             if (code) {
-                if (code.data.length === 44 && !isNaN(code.data)) { // Verifica se é uma chave MDF-e válida (44 números)
-                    inputMdfe.value = code.data;
+                let scannedData = code.data;
+                let mdfeKey = null;
+
+                // Tenta extrair a chave se for uma URL
+                if (scannedData.startsWith('http://') || scannedData.startsWith('https://')) {
+                    mdfeKey = extractMdfeKeyFromUrl(scannedData);
+                } else if (scannedData.length === 44 && !isNaN(scannedData)) {
+                    // Se não for URL, verifica se já é a chave de 44 dígitos
+                    mdfeKey = scannedData;
+                }
+
+                if (mdfeKey) {
+                    inputMdfe.value = mdfeKey;
                     alert('Chave MDF-e escaneada com sucesso!');
                     stopScanner();
-                    btnConsultarMdfe.click(); // Opcional: consulta automaticamente após escanear
+                    btnConsultarMdfe.click(); // Consulta automaticamente após escanear
                     return;
                 } else {
                     scannerMessage.textContent = 'QR Code inválido para MDF-e. Tente novamente.';
