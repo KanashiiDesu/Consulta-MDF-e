@@ -315,7 +315,7 @@
   <div id="errorModal" class="modal">
     <div class="modal-content">
       <h2 id="errorModalTitle">Erro na Leitura</h2>
-      <p id="errorModalMessage">O conteúdo escaneado não é uma chave MDF-e válida ou um QR Code de MDF-e reconhecido.</p>
+      <p id="errorModalMessage">O conteúdo escaneado não é um QR Code de MDF-e reconhecido.</p>
       <div class="modal-buttons">
         <button class="confirm-btn" id="tryAgainBtn">Tentar Novamente</button>
         <button class="cancel-btn" id="closeErrorModal">Voltar</button>
@@ -549,7 +549,7 @@
         resetToInitialState(); // Retorna ao estado inicial
       } else {
         stopCamera(); // Para a câmera em caso de scan inválido
-        showModal(errorModal, 'Erro na Leitura!', 'O conteúdo escaneado não é uma chave MDF-e válida ou um QR Code de MDF-e reconhecido. Tente novamente.', true); // Exibe o modal de erro com opção "Tentar Novamente"
+        showModal(errorModal, 'Erro na Leitura!', 'O conteúdo escaneado não é um QR Code de MDF-e reconhecido. Tente novamente.', true); // Exibe o modal de erro com opção "Tentar Novamente"
       }
     }
 
