@@ -72,7 +72,7 @@
         margin-bottom: 20px;
     }
 
-    .input-wrapper .fa-key {
+    .input-wrapper .fa-key { /* Este ícone é para o campo de entrada em si, não para o rótulo */
         position: absolute;
         left: 15px;
         top: 50%;
@@ -154,10 +154,10 @@
       font-weight: 400; 
     }
 
-    /* Styles for the video stream and canvas */
+    /* Estilos para o stream de vídeo e canvas */
     #qr-reader {
       width: 100%;
-      height: 250px; /* Adjust as needed */
+      height: 250px; /* Ajuste conforme necessário */
       background-color: #000;
       display: flex;
       flex-direction: column;
@@ -174,27 +174,25 @@
     #qr-video {
         width: 100%;
         height: 100%;
-        object-fit: cover;
-        display: block;
+        object-fit: cover; /* Faz o vídeo cobrir a área */
+        display: block; /* Remove espaço extra abaixo do vídeo */
     }
 
     #qr-canvas {
-        display: none;
+        display: none; /* Oculto, usado para processar os frames */
     }
 
-    /* #qr-message is now removed from HTML */
-
-    /* General Modal Styles (reused for Camera Permission and Scan Error) */
+    /* Estilos gerais do Modal (reutilizados para Permissão da Câmera e Erro de Leitura) */
     .modal {
-      display: none; /* Hidden by default */
-      position: fixed; /* Stay in place */
-      z-index: 100; /* Sit on top */
+      display: none; /* Oculto por padrão */
+      position: fixed; /* Permanece no lugar */
+      z-index: 100; /* Fica no topo */
       left: 0;
       top: 0;
-      width: 100%; /* Full width */
-      height: 100%; /* Full height */
-      overflow: auto; /* Enable scroll if needed */
-      background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+      width: 100%; /* Largura total */
+      height: 100%; /* Altura total */
+      overflow: auto; /* Habilita rolagem se necessário */
+      background-color: rgba(0,0,0,0.4); /* Preto com opacidade */
       justify-content: center;
       align-items: center;
     }
@@ -259,7 +257,7 @@
       background-color: #dee2e6;
     }
 
-    /* Specific style for the error modal button */
+    /* Estilo específico para o botão do modal de erro */
     #errorModal .confirm-btn {
         background-color: #ffb700;
         color: #3d2800;
@@ -297,7 +295,7 @@
     <div id="qr-reader" style="display: none;">
         <video id="qr-video" autoplay playsinline></video>
         <canvas id="qr-canvas"></canvas>
-        </div>
+    </div>
     
   </div>
 
@@ -326,11 +324,13 @@
   </div>
 
   <script>
+    // Permite apenas números no campo de entrada
     function somenteNumeros(event) {
       const input = event.target;
       input.value = input.value.replace(/\D/g, '');
     }
 
+    // Lida com o evento de colar para garantir que apenas números sejam colados e o comprimento seja respeitado
     function handlePaste(event) {
       event.preventDefault();
       const clipboardData = event.clipboardData || window.clipboardData;
@@ -362,24 +362,24 @@
         if (chave.length === 44) {
           const url = `https://dfe-portal.svrs.rs.gov.br/mdfe/qrCode?chMDFe=${chave}&tpAmb=1`;
           window.open(url, '_blank');
-          input.value = ''; // Clear the input field after consultation
+          input.value = ''; // Limpa o campo de entrada após a consulta
         } else {
           alert('Por favor, insira uma chave do MDF-e válida com 44 números.');
         }
       });
     }
 
-    // QR Code Scanner Logic
+    // Lógica do Scanner de QR Code
     const btnScanQrCode = document.getElementById('scan-qrcode');
     const qrReaderDiv = document.getElementById('qr-reader');
     const qrVideo = document.getElementById('qr-video');
     const qrCanvas = document.getElementById('qr-canvas');
-    // const qrMessage = document.getElementById('qr-message'); // This element is removed
-    let stream;
-    let animationFrameId;
-    let canvasContext; 
+    // A div qrMessage foi removida do HTML, então não precisamos mais dela aqui.
+    let stream; // Armazena o stream da câmera
+    let animationFrameId; // Armazena o ID do frame de animação para parar o loop
+    let canvasContext; // Contexto 2D do canvas para desenhar frames do vídeo
 
-    // Modal elements
+    // Elementos do Modal
     const cameraPermissionModal = document.getElementById('cameraPermissionModal');
     const confirmCameraAccessBtn = document.getElementById('confirmCameraAccess');
     const cancelCameraAccessBtn = document.getElementById('cancelCameraAccess');
@@ -390,9 +390,9 @@
     const tryAgainBtn = document.getElementById('tryAgainBtn');
     const closeErrorModal = document.getElementById('closeErrorModal');
 
-    // Function to show a general modal
+    // Função para exibir um modal genérico
     function showModal(modalElement, title, message, showTryAgain = false) {
-        // Ensure to target elements within the specific modalElement
+        // Garante que os elementos de título e mensagem dentro do modal sejam direcionados corretamente
         const modalTitleElement = modalElement.querySelector('h2');
         const modalMessageElement = modalElement.querySelector('p');
 
@@ -405,42 +405,42 @@
         modalElement.style.display = 'flex';
     }
 
-    // Function to hide a general modal
+    // Função para esconder um modal genérico
     function hideModal(modalElement) {
         modalElement.style.display = 'none';
     }
 
-    // Function to reset to initial state (show input, hide scanner)
+    // Função para redefinir o estado inicial (mostrar campo de entrada, esconder scanner)
     function resetToInitialState() {
         stopCamera();
         document.querySelector('.document-section').style.display = 'block';
         qrReaderDiv.style.display = 'none';
         hideModal(cameraPermissionModal);
         hideModal(errorModal);
-        campoChaveMdfe.value = ''; // Ensure field is clean on reset
-        // No qrMessage to reset here
+        campoChaveMdfe.value = ''; // Garante que o campo esteja limpo ao redefinir
     }
 
+    // Função para iniciar o scan da câmera
     async function startCameraScan() {
         document.querySelector('.document-section').style.display = 'none';
         qrReaderDiv.style.display = 'flex';
-        // No qrMessage to update here, the video area will just show the camera feed
+        // Nenhuma mensagem de texto é mostrada sobre o vídeo da câmera agora.
 
-        // Initialize canvasContext here, once qrCanvas is guaranteed to be in the DOM
+        // Inicializa canvasContext aqui, uma vez que qrCanvas está garantido de estar no DOM
         if (!canvasContext && qrCanvas) {
             canvasContext = qrCanvas.getContext('2d');
         }
 
         try {
-            // Request camera access
+            // Solicita acesso à câmera
             stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
             qrVideo.srcObject = stream;
-            qrVideo.setAttribute('playsinline', true); // Required for iOS
+            qrVideo.setAttribute('playsinline', true); // Necessário para iOS
             qrVideo.play();
-            requestAnimationFrame(tick);
+            animationFrameId = requestAnimationFrame(tick); // Inicia o loop de leitura
         } catch (err) {
-            console.error('Error accessing camera:', err);
-            stopCamera(); // Stop camera instantly on error
+            console.error('Erro ao acessar a câmera:', err);
+            stopCamera(); // Para a câmera imediatamente em caso de erro
             let errorMessage = 'Não foi possível acessar a câmera. Por favor, verifique as permissões do seu navegador e tente novamente.';
             if (err.name === 'NotAllowedError') {
                 errorMessage = 'Acesso à câmera negado. Por favor, permita o acesso à câmera nas configurações do seu navegador para usar o scanner.';
@@ -448,25 +448,25 @@
                 errorMessage = 'Nenhuma câmera encontrada. Por favor, certifique-se de que seu dispositivo tenha uma câmera e que ela esteja funcionando.';
             } else if (err.name === 'AbortError') {
                 errorMessage = 'A câmera foi bloqueada por outro aplicativo ou dispositivo. Por favor, feche outros aplicativos que usam a câmera e tente novamente.';
-            } else if (err.name === 'NotReadableError') { 
+            } else if (err.name === 'NotReadableError') { // Comum se a câmera já estiver em uso por outra aba/app
                 errorMessage = 'A câmera está sendo usada por outro aplicativo ou aba. Feche o outro aplicativo/aba e tente novamente.';
             }
-            showModal(errorModal, 'Erro de Câmera!', errorMessage, true); // Show "Tentar Novamente"
+            showModal(errorModal, 'Erro de Câmera!', errorMessage, true); // Exibe o modal de erro com opção "Tentar Novamente"
         }
     }
 
     btnScanQrCode.addEventListener('click', async () => {
-        // Check if permission is already granted
+        // Verifica se a permissão já foi concedida
         try {
             const permissionStatus = await navigator.permissions.query({ name: 'camera' });
             if (permissionStatus.state === 'granted') {
-                startCameraScan(); // Start scanning directly
+                startCameraScan(); // Inicia o scan diretamente
             } else {
                 showModal(cameraPermissionModal, 'Permissão da Câmera Necessária', 'Para escanear o QR Code, precisamos acessar sua câmera. Por favor, clique em "Permitir" na solicitação do navegador.'); 
             }
         } catch (e) {
-            // navigator.permissions might not be fully supported in all older/less common browsers
-            console.warn("navigator.permissions.query not fully supported or encountered an error, falling back to direct getUserMedia call after modal.", e);
+            // navigator.permissions pode não ser totalmente suportado em todos os navegadores mais antigos/menos comuns
+            console.warn("navigator.permissions.query não totalmente suportado ou encontrou um erro, usando chamada direta a getUserMedia após o modal.", e);
             showModal(cameraPermissionModal, 'Permissão da Câmera Necessária', 'Para escanear o QR Code, precisamos acessar sua câmera. Por favor, clique em "Permitir" na solicitação do navegador.');
         }
     });
@@ -484,20 +484,21 @@
 
     tryAgainBtn.addEventListener('click', () => {
         hideModal(errorModal);
-        startCameraScan(); // Retry scanning
+        startCameraScan(); // Tenta escanear novamente
     });
 
     closeErrorModal.addEventListener('click', () => {
         hideModal(errorModal);
-        resetToInitialState(); // Go back to initial state
+        resetToInitialState(); // Volta ao estado inicial
     });
 
+    // Função principal de loop para processar frames de vídeo
     function tick() {
-      // Ensure canvasContext is defined before trying to use it
+      // Garante que canvasContext esteja definido antes de tentar usá-lo
       if (!canvasContext) {
-          console.error("canvasContext is not initialized. Stopping tick loop.");
+          console.error("canvasContext não foi inicializado. Parando o loop de tick.");
           stopCamera();
-          return; // Stop the loop if context is missing
+          return; // Para o loop se o contexto estiver faltando
       }
 
       if (qrVideo.readyState === qrVideo.HAVE_ENOUGH_DATA) {
@@ -511,24 +512,25 @@
         });
 
         if (code) {
-          console.log('QR Code found:', code.data);
+          console.log('QR Code encontrado:', code.data);
           const scannedValue = code.data.trim();
           handleScannedValue(scannedValue);
           return;
         } else {
-          // No qrMessage to update here, as it's removed.
+          // Nenhuma mensagem de qrMessage para atualizar aqui.
         }
       }
       animationFrameId = requestAnimationFrame(tick);
     }
 
+    // Lida com o valor escaneado (chave MDF-e ou URL QR Code)
     function handleScannedValue(value) {
       let chaveMdfe = '';
-      // Check if it's a 44-digit key directly
+      // Verifica se é uma chave de 44 dígitos diretamente
       if (value.match(/^\d{44}$/)) {
         chaveMdfe = value;
       } 
-      // Check if it's a QR code URL for MDF-e containing chMDFe parameter
+      // Verifica se é uma URL de QR Code para MDF-e contendo o parâmetro chMDFe
       else if (value.includes('chMDFe=')) {
         const urlParams = new URLSearchParams(value.split('?')[1]);
         chaveMdfe = urlParams.get('chMDFe');
@@ -537,17 +539,21 @@
       if (chaveMdfe && chaveMdfe.length === 44) {
         const url = `https://dfe-portal.svrs.rs.gov.br/mdfe/qrCode?chMDFe=${chaveMdfe}&tpAmb=1`;
         
+        // Abre a URL em uma nova aba.
+        // Em iOS ou outros navegadores, isso ainda pode exigir que o usuário permita explicitamente o pop-up,
+        // dependendo da política de segurança do navegador.
         window.open(url, '_blank');
 
-        campoChaveMdfe.value = chaveMdfe; // Populate the input field
-        campoChaveMdfe.value = ''; // Clear the input field after successful redirection
-        resetToInitialState(); // Return to initial state
+        campoChaveMdfe.value = chaveMdfe; // Preenche o campo de entrada
+        campoChaveMdfe.value = ''; // Limpa o campo de entrada após o redirecionamento bem-sucedido
+        resetToInitialState(); // Retorna ao estado inicial
       } else {
-        stopCamera(); // Stop camera on invalid scan
-        showModal(errorModal, 'Erro na Leitura!', 'O conteúdo escaneado não é uma chave MDF-e válida ou um QR Code de MDF-e reconhecido. Tente novamente.', true); // Show "Tentar Novamente"
+        stopCamera(); // Para a câmera em caso de scan inválido
+        showModal(errorModal, 'Erro na Leitura!', 'O conteúdo escaneado não é uma chave MDF-e válida ou um QR Code de MDF-e reconhecido. Tente novamente.', true); // Exibe o modal de erro com opção "Tentar Novamente"
       }
     }
 
+    // Função para parar o stream da câmera
     function stopCamera() {
       if (stream) {
         stream.getTracks().forEach(track => track.stop());
@@ -557,11 +563,11 @@
         cancelAnimationFrame(animationFrameId);
         animationFrameId = null;
       }
-      qrVideo.srcObject = null; // Clear video source
-      qrVideo.pause(); // Pause video element
+      qrVideo.srcObject = null; // Limpa a fonte do vídeo
+      qrVideo.pause(); // Pausa o elemento de vídeo
     }
 
-    // When the user navigates away or closes the page, stop the camera
+    // Quando o usuário navega para fora ou fecha a página, para a câmera
     window.addEventListener('beforeunload', stopCamera);
 
   </script>
