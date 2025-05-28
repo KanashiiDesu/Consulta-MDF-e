@@ -1,1 +1,373 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Consulta MDF-e</title>
+  <link rel="icon" type="image/svg+xml" href='data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><defs><linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="%23004d38"/><stop offset="100%" stop-color="%23007a53"/></linearGradient></defs><path fill="url(%23grad)" d="M0 64C0 28.7 28.7 0 64 0L224 0l0 128c0 17.7 14.3 32 32 32l128 0 0 288c0 35.3-28.7 64-64 64L64 512c-35.3 0-64-28.7-64-64L0 64zm384 64l-128 0L256 0 384 128z"/></svg>'>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+<style class="">
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
 
+    body {
+      background: linear-gradient(135deg, #004d38, #006a4e);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      color: #ffffff;
+      padding: 20px;
+    }
+
+    .container {
+      background-color: #ffffff; 
+      padding: 35px 45px; 
+      border-radius: 15px; 
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15); 
+      max-width: 500px; 
+      width: 100%;
+      text-align: center;
+      color: #333333;
+    }
+
+    h1 {
+      margin-bottom: 35px; 
+      font-weight: 700;
+      font-size: 1.8rem; 
+      color: #004d38;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Icon style removed from h1 as icon is removed */
+
+    .document-section {
+        margin-bottom: 30px;
+        padding: 20px;
+        background-color: #f8f9fa; 
+        border-radius: 10px;
+        border: 1px solid #e9ecef; 
+    }
+    .document-section:last-of-type {
+        margin-bottom: 0;
+    }
+
+    label {
+      display: flex; 
+      align-items: center;
+      font-weight: 600;
+      margin-bottom: 12px;
+      font-size: 1.05rem; 
+      text-align: left;
+      color: #005a40; 
+    }
+
+    /* Icon style removed from label as icon is removed */
+
+    .input-wrapper {
+        position: relative;
+        margin-bottom: 20px;
+    }
+
+    .input-wrapper .fa-key { /* This icon is for the input field itself, not the label */
+        position: absolute;
+        left: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #007a53;
+        font-size: 0.9rem;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 12px 15px 12px 40px; 
+      border-radius: 8px;
+      border: 1px solid #ced4da; 
+      font-size: 1rem;
+      color: #495057;
+      background-color: #fff;
+    }
+
+    input[type="text"]:focus {
+      border-color: #007a53; 
+      box-shadow: 0 0 0 0.2rem rgba(0, 122, 83, 0.25); 
+      outline: none;
+    }
+
+    button {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px; 
+      margin-top: 10px;
+      padding: 12px 25px; 
+      font-size: 1rem; 
+      font-weight: 600; 
+      border: none;
+      border-radius: 8px;
+      background-color: #ffb700; 
+      color: #3d2800; 
+      cursor: pointer;
+      transition: background-color 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
+      width: 100%;
+      box-shadow: 0 2px 5px rgba(0,0,0, 0.1);
+    }
+
+    button .fa-solid {
+        font-size: 1.1em; 
+    }
+
+    button:hover {
+      background-color: #e6a200; 
+      transform: translateY(-2px);
+      box-shadow: 0 4px 10px rgba(0,0,0, 0.15);
+    }
+
+    button:active {
+      transform: translateY(0);
+      box-shadow: 0 2px 5px rgba(0,0,0, 0.1);
+    }
+
+    p.info {
+      font-size: 0.8rem; 
+      color: #555555;
+      margin-top: 10px; 
+      text-align: left;
+      line-height: 1.4;
+    }
+
+    p.info .fa-info-circle {
+        margin-right: 5px;
+        color: #007a53;
+    }
+
+    .assinatura {
+      margin-top: 30px; 
+      font-size: 0.85rem;
+      color: rgba(255, 255, 255, 0.7); 
+      font-style: italic;
+      user-select: none;
+      pointer-events: none;
+      font-weight: 400; 
+    }
+
+    /* Styles for the video stream and canvas */
+    #qr-reader {
+      width: 100%;
+      height: 250px; /* Adjust as needed */
+      background-color: #000;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: #fff;
+      font-size: 1.2rem;
+      margin-top: 20px;
+      border-radius: 10px;
+      overflow: hidden; /* Ensure video doesn't overflow */
+    }
+
+    #qr-video {
+        width: 100%;
+        height: 100%;
+        object-fit: cover; /* This makes the video cover the area */
+        display: block; /* Remove extra space below video */
+    }
+
+    #qr-canvas {
+        display: none; /* Hidden, used for processing frames */
+    }
+
+    #qr-message {
+      margin-top: 15px;
+      font-size: 0.9rem;
+      color: #555555;
+    }
+
+  </style>
+</head>
+<body>
+  
+  <div class="container">
+    <h1>Consulta MDF-e</h1>
+
+    <div class="document-section">
+      <label for="chave-mdfe">Chave do MDF-e:</label>
+      <div class="input-wrapper">
+        <i class="fa-solid fa-key"></i>
+        <input
+          type="text"
+          id="chave-mdfe"
+          name="chave-mdfe"
+          placeholder="Digite os 44 números da chave do MDF-e"
+          maxlength="44"
+          inputmode="numeric"
+          autocomplete="off"
+          spellcheck="false"
+        />
+      </div>
+      <button id="consultar-mdfe"><i class="fa-solid fa-magnifying-glass"></i>Consultar MDF-e</button>
+      <button id="scan-qrcode" style="background-color: #007a53; color: #ffffff;"><i class="fa-solid fa-camera"></i>Escanear MDF-e / QR Code</button>
+    </div>
+
+    <div id="qr-reader" style="display: none;">
+        <video id="qr-video" autoplay playsinline></video>
+        <canvas id="qr-canvas"></canvas>
+        <div id="qr-message">Aguardando permissão da câmera...</div>
+    </div>
+    
+  </div>
+
+  <div class="assinatura">by Thalis Gomes</div>
+
+  <script>
+    function somenteNumeros(event) {
+      const input = event.target;
+      input.value = input.value.replace(/\D/g, '');
+    }
+
+    function handlePaste(event) {
+      event.preventDefault();
+      const clipboardData = event.clipboardData || window.clipboardData;
+      let pastedData = clipboardData.getData('text').replace(/\D/g, '');
+
+      const input = event.target;
+      const start = input.selectionStart;
+      const end = input.selectionEnd;
+      const newValue = input.value.slice(0, start) + pastedData + input.value.slice(end);
+
+      input.value = newValue.slice(0, 44);
+      const newCursorPos = Math.min(start + pastedData.length, 44);
+      input.setSelectionRange(newCursorPos, newCursorPos);
+      input.dispatchEvent(new Event('input', { bubbles: true }));
+    }
+
+    const campoChaveMdfe = document.getElementById('chave-mdfe');
+
+    if (campoChaveMdfe) {
+        campoChaveMdfe.addEventListener('input', somenteNumeros);
+        campoChaveMdfe.addEventListener('paste', handlePaste);
+    }
+
+    const btnConsultarMdfe = document.getElementById('consultar-mdfe');
+    if (btnConsultarMdfe) {
+      btnConsultarMdfe.addEventListener('click', () => {
+        const input = document.getElementById('chave-mdfe');
+        const chave = input.value.trim();
+        if (chave.length === 44) {
+          const url = `https://dfe-portal.svrs.rs.gov.br/mdfe/qrCode?chMDFe=${chave}&tpAmb=1`;
+          window.open(url, '_blank');
+          input.value = '';
+        } else {
+          alert('Por favor, insira uma chave do MDF-e válida com 44 números.');
+        }
+      });
+    }
+
+    // QR Code Scanner Logic
+    const btnScanQrCode = document.getElementById('scan-qrcode');
+    const qrReaderDiv = document.getElementById('qr-reader');
+    const qrVideo = document.getElementById('qr-video');
+    const qrCanvas = document.getElementById('qr-canvas');
+    const qrMessage = document.getElementById('qr-message');
+    const canvasContext = qrCanvas.getContext('2d');
+    let stream;
+    let animationFrameId;
+
+    btnScanQrCode.addEventListener('click', () => {
+      // Hide the input and consult button
+      document.querySelector('.document-section').style.display = 'none';
+      qrReaderDiv.style.display = 'flex';
+      qrMessage.textContent = 'Aguardando permissão da câmera...';
+
+      // Request camera access
+      navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } }) // 'environment' prefers the back camera
+        .then((s) => {
+          stream = s;
+          qrVideo.srcObject = stream;
+          qrVideo.setAttribute('playsinline', true); // Required for iOS
+          qrVideo.play();
+          requestAnimationFrame(tick);
+        })
+        .catch((err) => {
+          console.error('Error accessing camera:', err);
+          qrMessage.textContent = 'Não foi possível acessar a câmera. Por favor, verifique as permissões.';
+          // Show the input and consult button again if camera access fails
+          document.querySelector('.document-section').style.display = 'block';
+          qrReaderDiv.style.display = 'none';
+        });
+    });
+
+    function tick() {
+      if (qrVideo.readyState === qrVideo.HAVE_ENOUGH_DATA) {
+        qrCanvas.hidden = false;
+        qrCanvas.height = qrVideo.videoHeight;
+        qrCanvas.width = qrVideo.videoWidth;
+        canvasContext.drawImage(qrVideo, 0, 0, qrCanvas.width, qrCanvas.height);
+        const imageData = canvasContext.getImageData(0, 0, qrCanvas.width, qrCanvas.height);
+        const code = jsQR(imageData.data, imageData.width, imageData.height, {
+          inversionAttempts: 'dontInvert',
+        });
+
+        if (code) {
+          console.log('QR Code found:', code.data);
+          const scannedValue = code.data.trim();
+          handleScannedValue(scannedValue);
+          stopCamera();
+          return; // Stop processing frames once a code is found
+        } else {
+          qrMessage.textContent = 'Aponte a câmera para o QR Code ou chave MDF-e.';
+        }
+      }
+      animationFrameId = requestAnimationFrame(tick);
+    }
+
+    function handleScannedValue(value) {
+      let chaveMdfe = '';
+      // Check if it's a 44-digit key directly
+      if (value.match(/^\d{44}$/)) {
+        chaveMdfe = value;
+      } 
+      // Check if it's a QR code URL for MDF-e containing chMDFe parameter
+      else if (value.includes('chMDFe=')) {
+        const urlParams = new URLSearchParams(value.split('?')[1]);
+        chaveMdfe = urlParams.get('chMDFe');
+      }
+
+      if (chaveMdfe && chaveMdfe.length === 44) {
+        const url = `https://dfe-portal.svrs.rs.gov.br/mdfe/qrCode?chMDFe=${chaveMdfe}&tpAmb=1`;
+        window.open(url, '_blank');
+        campoChaveMdfe.value = chaveMdfe; // Populate the input field
+        // Hide the scanner and show the input/consult button again
+        document.querySelector('.document-section').style.display = 'block';
+        qrReaderDiv.style.display = 'none';
+      } else {
+        alert('Conteúdo escaneado não é uma chave MDF-e válida ou um QR Code de MDF-e reconhecido.');
+        qrMessage.textContent = 'Nenhum QR Code de MDF-e válido encontrado. Tente novamente.';
+        // If not a valid MDF-e, resume scanning
+        requestAnimationFrame(tick);
+      }
+    }
+
+    function stopCamera() {
+      if (stream) {
+        stream.getTracks().forEach(track => track.stop());
+      }
+      if (animationFrameId) {
+        cancelAnimationFrame(animationFrameId);
+      }
+      qrVideo.srcObject = null;
+    }
+
+    // When the user navigates away or closes the page, stop the camera
+    window.addEventListener('beforeunload', stopCamera);
+
+  </script>
+</body>
+</html>
