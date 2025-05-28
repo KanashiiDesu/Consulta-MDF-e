@@ -172,6 +172,7 @@
       margin-top: 20px;
       border-radius: 10px;
       overflow: hidden; /* Ensure video doesn't overflow */
+      position: relative; /* For the "Try Again" button */
     }
 
     #qr-video {
@@ -189,6 +190,31 @@
       margin-top: 15px;
       font-size: 0.9rem;
       color: #555555;
+      text-align: center;
+      padding: 0 10px; /* Add padding for better readability */
+    }
+
+    /* Styles for the "Try Again" button inside qr-reader */
+    #try-again-button {
+        position: absolute;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        padding: 8px 15px;
+        background-color: #ffb700;
+        color: #3d2800;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        display: none; /* Hidden by default */
+        font-weight: 600;
+        z-index: 10; /* Ensure it's above video */
+        box-shadow: 0 2px 5px rgba(0,0,0, 0.1);
+    }
+
+    #try-again-button:hover {
+        background-color: #e6a200;
+        transform: translateX(-50%) translateY(-2px);
     }
 
     /* Modal (Pop-up) Styles */
@@ -295,6 +321,7 @@
         <video id="qr-video" autoplay playsinline></video>
         <canvas id="qr-canvas"></canvas>
         <div id="qr-message">Aguardando permissão da câmera...</div>
+        <button id="try-again-button" style="display: none;">Tentar Novamente</button>
     </div>
     
   </div>
@@ -349,7 +376,7 @@
         if (chave.length === 44) {
           const url = `https://dfe-portal.svrs.rs.gov.br/mdfe/qrCode?chMDFe=${chave}&tpAmb=1`;
           window.open(url, '_blank');
-          input.value = '';
+          input.value = ''; // Clear the input field after consultation
         } else {
           alert('Por favor, insira uma chave do MDF-e válida com 44 números.');
         }
@@ -363,6 +390,7 @@
     const qrCanvas = document.getElementById('qr-canvas');
     const qrMessage = document.getElementById('qr-message');
     const canvasContext = qrCanvas.getContext('2d');
+    const tryAgainButton = document.getElementById('try-again-button'); // New button
     let stream;
     let animationFrameId;
 
@@ -371,44 +399,61 @@
     const confirmCameraAccessBtn = document.getElementById('confirmCameraAccess');
     const cancelCameraAccessBtn = document.getElementById('cancelCameraAccess');
 
+    // Function to reset to initial state (show input, hide scanner)
+    function resetToInitialState() {
+        stopCamera();
+        document.querySelector('.document-section').style.display = 'block';
+        qrReaderDiv.style.display = 'none';
+        tryAgainButton.style.display = 'none'; // Hide try again button
+        qrMessage.textContent = ''; // Clear message
+    }
+
     async function startCameraScan() {
-        // Hide the input and consult button
         document.querySelector('.document-section').style.display = 'none';
         qrReaderDiv.style.display = 'flex';
         qrMessage.textContent = 'Aguardando permissão da câmera...';
+        tryAgainButton.style.display = 'none'; // Hide try again button initially
 
         try {
-            stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } }); // 'environment' prefers the back camera
+            stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
             qrVideo.srcObject = stream;
-            qrVideo.setAttribute('playsinline', true); // Required for iOS
+            qrVideo.setAttribute('playsinline', true);
             qrVideo.play();
             requestAnimationFrame(tick);
         } catch (err) {
             console.error('Error accessing camera:', err);
             qrMessage.textContent = 'Não foi possível acessar a câmera. Por favor, verifique as permissões.';
-            // Show the input and consult button again if camera access fails
-            document.querySelector('.document-section').style.display = 'block';
-            qrReaderDiv.style.display = 'none';
-            alert('Acesso à câmera negado. Por favor, permita o acesso à câmera nas configurações do seu navegador para usar o scanner.');
+            tryAgainButton.style.display = 'block'; // Show try again button on error
+            alert('Acesso à câmera negado ou erro ao iniciar. Por favor, permita o acesso à câmera nas configurações do seu navegador para usar o scanner.');
+            // Do NOT reset to initial state here, allow user to try again
         }
     }
 
-    btnScanQrCode.addEventListener('click', () => {
-        // Show the custom modal first
-        cameraPermissionModal.style.display = 'flex'; // Use flex to center the modal content
+    btnScanQrCode.addEventListener('click', async () => {
+        // Check if permission is already granted
+        const permissionStatus = await navigator.permissions.query({ name: 'camera' });
+        if (permissionStatus.state === 'granted') {
+            startCameraScan(); // Start scanning directly
+        } else {
+            cameraPermissionModal.style.display = 'flex'; // Show custom modal
+        }
     });
 
     confirmCameraAccessBtn.addEventListener('click', () => {
-        cameraPermissionModal.style.display = 'none'; // Hide the modal
-        startCameraScan(); // Then attempt to start camera
+        cameraPermissionModal.style.display = 'none';
+        startCameraScan();
     });
 
     cancelCameraAccessBtn.addEventListener('click', () => {
-        cameraPermissionModal.style.display = 'none'; // Hide the modal
-        // Show the input and consult button again if user cancels
-        document.querySelector('.document-section').style.display = 'block';
-        qrReaderDiv.style.display = 'none';
+        cameraPermissionModal.style.display = 'none';
+        resetToInitialState(); // Go back to initial state if canceled
         alert('Você cancelou o acesso à câmera.');
+    });
+
+    tryAgainButton.addEventListener('click', () => {
+        // When "Try Again" is clicked, stop current camera and restart scan
+        stopCamera();
+        startCameraScan();
     });
 
     function tick() {
@@ -426,10 +471,11 @@
           console.log('QR Code found:', code.data);
           const scannedValue = code.data.trim();
           handleScannedValue(scannedValue);
-          stopCamera();
-          return; // Stop processing frames once a code is found
+          stopCamera(); // Stop camera after successful scan
+          return;
         } else {
           qrMessage.textContent = 'Aponte a câmera para o QR Code.';
+          tryAgainButton.style.display = 'none'; // Keep hidden during active scanning
         }
       }
       animationFrameId = requestAnimationFrame(tick);
@@ -451,23 +497,24 @@
         const url = `https://dfe-portal.svrs.rs.gov.br/mdfe/qrCode?chMDFe=${chaveMdfe}&tpAmb=1`;
         window.open(url, '_blank');
         campoChaveMdfe.value = chaveMdfe; // Populate the input field
-        // Hide the scanner and show the input/consult button again
-        document.querySelector('.document-section').style.display = 'block';
-        qrReaderDiv.style.display = 'none';
+        campoChaveMdfe.value = ''; // Clear the input field after successful redirection
+        resetToInitialState(); // Return to initial state
       } else {
-        alert('Conteúdo escaneado não é uma chave MDF-e válida ou um QR Code de MDF-e reconhecido.');
-        qrMessage.textContent = 'Nenhum QR Code de MDF-e válido encontrado. Tente novamente.';
-        // If not a valid MDF-e, resume scanning
-        requestAnimationFrame(tick);
+        qrMessage.textContent = 'Conteúdo escaneado não é uma chave MDF-e válida ou um QR Code de MDF-e reconhecido. Tente novamente.';
+        tryAgainButton.style.display = 'block'; // Show try again button on invalid scan
+        // Do NOT restart camera automatically, let user click try again
+        stopCamera(); // Stop camera to prevent continuous scanning of invalid data
       }
     }
 
     function stopCamera() {
       if (stream) {
         stream.getTracks().forEach(track => track.stop());
+        stream = null; // Clear stream reference
       }
       if (animationFrameId) {
         cancelAnimationFrame(animationFrameId);
+        animationFrameId = null; // Clear animation frame ID
       }
       qrVideo.srcObject = null;
     }
