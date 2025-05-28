@@ -182,18 +182,7 @@
         display: none;
     }
 
-    #qr-message { /* This is re-enabled for "Aponte a câmera..." message */
-      position: absolute; /* Position over the video */
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      font-size: 1.2rem;
-      color: white; /* White text on black video background */
-      text-shadow: 1px 1px 3px rgba(0,0,0,0.7); /* Add shadow for readability */
-      z-index: 5; /* Ensure it's above video */
-      text-align: center;
-      width: 90%; /* To prevent text from going too wide */
-    }
+    /* #qr-message is now removed from HTML */
 
     /* General Modal Styles (reused for Camera Permission and Scan Error) */
     .modal {
@@ -308,8 +297,7 @@
     <div id="qr-reader" style="display: none;">
         <video id="qr-video" autoplay playsinline></video>
         <canvas id="qr-canvas"></canvas>
-        <div id="qr-message">Aponte a câmera para o QR Code.</div>
-    </div>
+        </div>
     
   </div>
 
@@ -386,10 +374,10 @@
     const qrReaderDiv = document.getElementById('qr-reader');
     const qrVideo = document.getElementById('qr-video');
     const qrCanvas = document.getElementById('qr-canvas');
-    const qrMessage = document.getElementById('qr-message'); 
+    // const qrMessage = document.getElementById('qr-message'); // This element is removed
     let stream;
     let animationFrameId;
-    let canvasContext; // Declare canvasContext here, at a higher scope
+    let canvasContext; 
 
     // Modal elements
     const cameraPermissionModal = document.getElementById('cameraPermissionModal');
@@ -430,13 +418,13 @@
         hideModal(cameraPermissionModal);
         hideModal(errorModal);
         campoChaveMdfe.value = ''; // Ensure field is clean on reset
-        qrMessage.textContent = 'Aponte a câmera para o QR Code.'; // Reset default message
+        // No qrMessage to reset here
     }
 
     async function startCameraScan() {
         document.querySelector('.document-section').style.display = 'none';
         qrReaderDiv.style.display = 'flex';
-        qrMessage.textContent = 'Aponte a câmera para o QR Code.'; // Initial message in video area
+        // No qrMessage to update here, the video area will just show the camera feed
 
         // Initialize canvasContext here, once qrCanvas is guaranteed to be in the DOM
         if (!canvasContext && qrCanvas) {
@@ -460,7 +448,7 @@
                 errorMessage = 'Nenhuma câmera encontrada. Por favor, certifique-se de que seu dispositivo tenha uma câmera e que ela esteja funcionando.';
             } else if (err.name === 'AbortError') {
                 errorMessage = 'A câmera foi bloqueada por outro aplicativo ou dispositivo. Por favor, feche outros aplicativos que usam a câmera e tente novamente.';
-            } else if (err.name === 'NotReadableError') { // Common if camera is already in use by another tab/app
+            } else if (err.name === 'NotReadableError') { 
                 errorMessage = 'A câmera está sendo usada por outro aplicativo ou aba. Feche o outro aplicativo/aba e tente novamente.';
             }
             showModal(errorModal, 'Erro de Câmera!', errorMessage, true); // Show "Tentar Novamente"
@@ -526,10 +514,9 @@
           console.log('QR Code found:', code.data);
           const scannedValue = code.data.trim();
           handleScannedValue(scannedValue);
-          // stopCamera(); // This is called in handleScannedValue now
           return;
         } else {
-          qrMessage.textContent = 'Aponte a câmera para o QR Code.'; // Keep updating message
+          // No qrMessage to update here, as it's removed.
         }
       }
       animationFrameId = requestAnimationFrame(tick);
