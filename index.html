@@ -6,7 +6,7 @@
   <link rel="icon" type="image/svg+xml" href='data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><defs><linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="%23004d38"/><stop offset="100%" stop-color="%23007a53"/></linearGradient></defs><path fill="url(%23grad)" d="M0 64C0 28.7 28.7 0 64 0L224 0l0 128c0 17.7 14.3 32 32 32l128 0 0 288c0 35.3-28.7 64-64 64L64 512c-35.3 0-64-28.7-64-64L0 64zm384 64l-128 0L256 0 384 128z"/></svg>'>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
   <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
-<style class="">
+<style>
     * {
       box-sizing: border-box;
       margin: 0;
@@ -46,8 +46,6 @@
       justify-content: center;
     }
 
-    /* Icon style removed from h1 as icon is removed */
-
     .document-section {
         margin-bottom: 30px;
         padding: 20px;
@@ -69,14 +67,12 @@
       color: #005a40; 
     }
 
-    /* Icon style removed from label as icon is removed */
-
     .input-wrapper {
         position: relative;
         margin-bottom: 20px;
     }
 
-    .input-wrapper .fa-key { /* This icon is for the input field itself, not the label */
+    .input-wrapper .fa-key {
         position: absolute;
         left: 15px;
         top: 50%;
@@ -164,26 +160,26 @@
       height: 250px; /* Adjust as needed */
       background-color: #000;
       display: flex;
-      flex-direction: column; /* Changed to column for message */
+      flex-direction: column;
       justify-content: center;
       align-items: center;
       color: #fff;
       font-size: 1.2rem;
       margin-top: 20px;
       border-radius: 10px;
-      overflow: hidden; /* Ensure video doesn't overflow */
-      position: relative; /* For the "Try Again" button */
+      overflow: hidden;
+      position: relative;
     }
 
     #qr-video {
         width: 100%;
         height: 100%;
-        object-fit: cover; /* This makes the video cover the area */
-        display: block; /* Remove extra space below video */
+        object-fit: cover;
+        display: block;
     }
 
     #qr-canvas {
-        display: none; /* Hidden, used for processing frames */
+        display: none;
     }
 
     #qr-message {
@@ -191,33 +187,10 @@
       font-size: 0.9rem;
       color: #555555;
       text-align: center;
-      padding: 0 10px; /* Add padding for better readability */
+      padding: 0 10px;
     }
 
-    /* Styles for the "Try Again" button inside qr-reader */
-    #try-again-button {
-        position: absolute;
-        bottom: 20px;
-        left: 50%;
-        transform: translateX(-50%);
-        padding: 8px 15px;
-        background-color: #ffb700;
-        color: #3d2800;
-        border: none;
-        border-radius: 5px;
-        cursor: pointer;
-        display: none; /* Hidden by default */
-        font-weight: 600;
-        z-index: 10; /* Ensure it's above video */
-        box-shadow: 0 2px 5px rgba(0,0,0, 0.1);
-    }
-
-    #try-again-button:hover {
-        background-color: #e6a200;
-        transform: translateX(-50%) translateY(-2px);
-    }
-
-    /* Modal (Pop-up) Styles */
+    /* General Modal Styles (reused for Camera Permission and Scan Error) */
     .modal {
       display: none; /* Hidden by default */
       position: fixed; /* Stay in place */
@@ -269,9 +242,9 @@
       font-size: 0.95rem;
       cursor: pointer;
       transition: background-color 0.2s ease;
-      margin-top: 0; /* Override default button margin */
-      width: auto; /* Override default button width */
-      box-shadow: none; /* Override default button shadow */
+      margin-top: 0;
+      width: auto;
+      box-shadow: none;
     }
 
     .modal-buttons .confirm-btn {
@@ -291,6 +264,16 @@
     .modal-buttons .cancel-btn:hover {
       background-color: #dee2e6;
     }
+
+    /* Specific style for the error modal button */
+    #errorModal .confirm-btn {
+        background-color: #ffb700;
+        color: #3d2800;
+    }
+    #errorModal .confirm-btn:hover {
+        background-color: #e6a200;
+    }
+
   </style>
 </head>
 <body>
@@ -320,9 +303,7 @@
     <div id="qr-reader" style="display: none;">
         <video id="qr-video" autoplay playsinline></video>
         <canvas id="qr-canvas"></canvas>
-        <div id="qr-message">Aguardando permissão da câmera...</div>
-        <button id="try-again-button" style="display: none;">Tentar Novamente</button>
-    </div>
+        </div>
     
   </div>
 
@@ -335,6 +316,17 @@
       <div class="modal-buttons">
         <button class="confirm-btn" id="confirmCameraAccess">Entendido</button>
         <button class="cancel-btn" id="cancelCameraAccess">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="errorModal" class="modal">
+    <div class="modal-content">
+      <h2 id="errorModalTitle">Erro na Leitura</h2>
+      <p id="errorModalMessage">O conteúdo escaneado não é uma chave MDF-e válida ou um QR Code de MDF-e reconhecido.</p>
+      <div class="modal-buttons">
+        <button class="confirm-btn" id="tryAgainBtn">Tentar Novamente</button>
+        <button class="cancel-btn" id="closeErrorModal">Voltar</button>
       </div>
     </div>
   </div>
@@ -388,31 +380,52 @@
     const qrReaderDiv = document.getElementById('qr-reader');
     const qrVideo = document.getElementById('qr-video');
     const qrCanvas = document.getElementById('qr-canvas');
-    const qrMessage = document.getElementById('qr-message');
-    const canvasContext = qrCanvas.getContext('2d');
-    const tryAgainButton = document.getElementById('try-again-button'); // New button
+    // const qrMessage = document.getElementById('qr-message'); // Removed, now in modal
     let stream;
     let animationFrameId;
+    let newWindow = null; // Reference to the new window/tab for iOS redirection
 
     // Modal elements
     const cameraPermissionModal = document.getElementById('cameraPermissionModal');
     const confirmCameraAccessBtn = document.getElementById('confirmCameraAccess');
     const cancelCameraAccessBtn = document.getElementById('cancelCameraAccess');
 
+    const errorModal = document.getElementById('errorModal');
+    const errorModalTitle = document.getElementById('errorModalTitle');
+    const errorModalMessage = document.getElementById('errorModalMessage');
+    const tryAgainBtn = document.getElementById('tryAgainBtn');
+    const closeErrorModal = document.getElementById('closeErrorModal');
+
+    // Function to show a general modal
+    function showModal(modalElement, title, message, showTryAgain = false) {
+        if (title) errorModalTitle.textContent = title;
+        if (message) errorModalMessage.textContent = message;
+        
+        if (modalElement === errorModal) {
+            tryAgainBtn.style.display = showTryAgain ? 'block' : 'none';
+        }
+        modalElement.style.display = 'flex';
+    }
+
+    // Function to hide a general modal
+    function hideModal(modalElement) {
+        modalElement.style.display = 'none';
+    }
+
     // Function to reset to initial state (show input, hide scanner)
     function resetToInitialState() {
         stopCamera();
         document.querySelector('.document-section').style.display = 'block';
         qrReaderDiv.style.display = 'none';
-        tryAgainButton.style.display = 'none'; // Hide try again button
-        qrMessage.textContent = ''; // Clear message
+        hideModal(cameraPermissionModal);
+        hideModal(errorModal);
+        campoChaveMdfe.value = ''; // Ensure field is clean on reset
     }
 
     async function startCameraScan() {
         document.querySelector('.document-section').style.display = 'none';
         qrReaderDiv.style.display = 'flex';
-        qrMessage.textContent = 'Aguardando permissão da câmera...';
-        tryAgainButton.style.display = 'none'; // Hide try again button initially
+        // qrMessage.textContent = 'Aguardando permissão da câmera...'; // Message now handled by modal or video area implicitly
 
         try {
             stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
@@ -420,12 +433,26 @@
             qrVideo.setAttribute('playsinline', true);
             qrVideo.play();
             requestAnimationFrame(tick);
+            // After successful camera start, update message in the video area if needed
+            // document.getElementById('qr-message').textContent = 'Aponte a câmera para o QR Code.';
+
+            // Pre-authorize new window for iOS
+            // This is a workaround for iOS. It might open a blank tab and then navigate it.
+            // Some browsers might still block it or require user interaction.
+            newWindow = window.open('', '_blank');
+            if (newWindow) {
+                newWindow.document.write('Aguardando escaneamento do QR Code...');
+                newWindow.document.close();
+            } else {
+                console.warn('Pop-up bloqueado. O redirecionamento automático pode não funcionar no iOS.');
+                // Fallback message for user if pop-up is blocked
+                showModal(errorModal, 'Atenção!', 'O navegador pode estar bloqueando a abertura de uma nova aba. Por favor, permita pop-ups para este site ou copie a chave manualmente após o escaneamento.', false);
+            }
+
         } catch (err) {
             console.error('Error accessing camera:', err);
-            qrMessage.textContent = 'Não foi possível acessar a câmera. Por favor, verifique as permissões.';
-            tryAgainButton.style.display = 'block'; // Show try again button on error
-            alert('Acesso à câmera negado ou erro ao iniciar. Por favor, permita o acesso à câmera nas configurações do seu navegador para usar o scanner.');
-            // Do NOT reset to initial state here, allow user to try again
+            stopCamera(); // Stop camera instantly on error
+            showModal(errorModal, 'Erro de Câmera!', 'Não foi possível acessar a câmera. Por favor, verifique as permissões do seu navegador e tente novamente.', true); // Show "Tentar Novamente"
         }
     }
 
@@ -435,25 +462,29 @@
         if (permissionStatus.state === 'granted') {
             startCameraScan(); // Start scanning directly
         } else {
-            cameraPermissionModal.style.display = 'flex'; // Show custom modal
+            showModal(cameraPermissionModal); // Show custom modal
         }
     });
 
     confirmCameraAccessBtn.addEventListener('click', () => {
-        cameraPermissionModal.style.display = 'none';
+        hideModal(cameraPermissionModal);
         startCameraScan();
     });
 
     cancelCameraAccessBtn.addEventListener('click', () => {
-        cameraPermissionModal.style.display = 'none';
-        resetToInitialState(); // Go back to initial state if canceled
+        hideModal(cameraPermissionModal);
+        resetToInitialState();
         alert('Você cancelou o acesso à câmera.');
     });
 
-    tryAgainButton.addEventListener('click', () => {
-        // When "Try Again" is clicked, stop current camera and restart scan
-        stopCamera();
-        startCameraScan();
+    tryAgainBtn.addEventListener('click', () => {
+        hideModal(errorModal);
+        startCameraScan(); // Retry scanning
+    });
+
+    closeErrorModal.addEventListener('click', () => {
+        hideModal(errorModal);
+        resetToInitialState(); // Go back to initial state
     });
 
     function tick() {
@@ -474,8 +505,8 @@
           stopCamera(); // Stop camera after successful scan
           return;
         } else {
-          qrMessage.textContent = 'Aponte a câmera para o QR Code.';
-          tryAgainButton.style.display = 'none'; // Keep hidden during active scanning
+          // No QR found, continue scanning
+          // qrMessage.textContent = 'Aponte a câmera para o QR Code.'; // Message now handled by general 'scanning' state
         }
       }
       animationFrameId = requestAnimationFrame(tick);
@@ -495,26 +526,33 @@
 
       if (chaveMdfe && chaveMdfe.length === 44) {
         const url = `https://dfe-portal.svrs.rs.gov.br/mdfe/qrCode?chMDFe=${chaveMdfe}&tpAmb=1`;
-        window.open(url, '_blank');
+        
+        // Attempt redirection using the pre-authorized window if available
+        if (newWindow && !newWindow.closed) {
+            newWindow.location.href = url;
+            newWindow = null; // Clear reference
+        } else {
+            // Fallback if newWindow was blocked or closed
+            window.open(url, '_blank');
+        }
+
         campoChaveMdfe.value = chaveMdfe; // Populate the input field
         campoChaveMdfe.value = ''; // Clear the input field after successful redirection
         resetToInitialState(); // Return to initial state
       } else {
-        qrMessage.textContent = 'Conteúdo escaneado não é uma chave MDF-e válida ou um QR Code de MDF-e reconhecido. Tente novamente.';
-        tryAgainButton.style.display = 'block'; // Show try again button on invalid scan
-        // Do NOT restart camera automatically, let user click try again
-        stopCamera(); // Stop camera to prevent continuous scanning of invalid data
+        stopCamera(); // Stop camera on invalid scan
+        showModal(errorModal, 'Erro na Leitura!', 'O conteúdo escaneado não é uma chave MDF-e válida ou um QR Code de MDF-e reconhecido. Tente novamente.', true); // Show "Tentar Novamente"
       }
     }
 
     function stopCamera() {
       if (stream) {
         stream.getTracks().forEach(track => track.stop());
-        stream = null; // Clear stream reference
+        stream = null;
       }
       if (animationFrameId) {
         cancelAnimationFrame(animationFrameId);
-        animationFrameId = null; // Clear animation frame ID
+        animationFrameId = null;
       }
       qrVideo.srcObject = null;
     }
