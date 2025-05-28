@@ -182,12 +182,17 @@
         display: none;
     }
 
-    #qr-message {
-      margin-top: 15px;
-      font-size: 0.9rem;
-      color: #555555;
+    #qr-message { /* This is re-enabled for "Aponte a câmera..." message */
+      position: absolute; /* Position over the video */
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 1.2rem;
+      color: white; /* White text on black video background */
+      text-shadow: 1px 1px 3px rgba(0,0,0,0.7); /* Add shadow for readability */
+      z-index: 5; /* Ensure it's above video */
       text-align: center;
-      padding: 0 10px;
+      width: 90%; /* To prevent text from going too wide */
     }
 
     /* General Modal Styles (reused for Camera Permission and Scan Error) */
@@ -303,7 +308,8 @@
     <div id="qr-reader" style="display: none;">
         <video id="qr-video" autoplay playsinline></video>
         <canvas id="qr-canvas"></canvas>
-        </div>
+        <div id="qr-message">Aponte a câmera para o QR Code.</div>
+    </div>
     
   </div>
 
@@ -380,10 +386,9 @@
     const qrReaderDiv = document.getElementById('qr-reader');
     const qrVideo = document.getElementById('qr-video');
     const qrCanvas = document.getElementById('qr-canvas');
-    // const qrMessage = document.getElementById('qr-message'); // Removed, now in modal
+    const qrMessage = document.getElementById('qr-message'); // Re-enabled for live message
     let stream;
     let animationFrameId;
-    let newWindow = null; // Reference to the new window/tab for iOS redirection
 
     // Modal elements
     const cameraPermissionModal = document.getElementById('cameraPermissionModal');
@@ -420,12 +425,13 @@
         hideModal(cameraPermissionModal);
         hideModal(errorModal);
         campoChaveMdfe.value = ''; // Ensure field is clean on reset
+        qrMessage.textContent = 'Aponte a câmera para o QR Code.'; // Reset default message
     }
 
     async function startCameraScan() {
         document.querySelector('.document-section').style.display = 'none';
         qrReaderDiv.style.display = 'flex';
-        // qrMessage.textContent = 'Aguardando permissão da câmera...'; // Message now handled by modal or video area implicitly
+        qrMessage.textContent = 'Aponte a câmera para o QR Code.'; // Initial message in video area
 
         try {
             stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
@@ -433,26 +439,10 @@
             qrVideo.setAttribute('playsinline', true);
             qrVideo.play();
             requestAnimationFrame(tick);
-            // After successful camera start, update message in the video area if needed
-            // document.getElementById('qr-message').textContent = 'Aponte a câmera para o QR Code.';
-
-            // Pre-authorize new window for iOS
-            // This is a workaround for iOS. It might open a blank tab and then navigate it.
-            // Some browsers might still block it or require user interaction.
-            newWindow = window.open('', '_blank');
-            if (newWindow) {
-                newWindow.document.write('Aguardando escaneamento do QR Code...');
-                newWindow.document.close();
-            } else {
-                console.warn('Pop-up bloqueado. O redirecionamento automático pode não funcionar no iOS.');
-                // Fallback message for user if pop-up is blocked
-                showModal(errorModal, 'Atenção!', 'O navegador pode estar bloqueando a abertura de uma nova aba. Por favor, permita pop-ups para este site ou copie a chave manualmente após o escaneamento.', false);
-            }
-
         } catch (err) {
             console.error('Error accessing camera:', err);
             stopCamera(); // Stop camera instantly on error
-            showModal(errorModal, 'Erro de Câmera!', 'Não foi possível acessar a câmera. Por favor, verifique as permissões do seu navegador e tente novamente.', true); // Show "Tentar Novamente"
+            showModal(errorModal, 'Erro de Câmera!', 'Não foi possível acessar a câmera. Por favor, verifique as permissões do seu navegador (como o Mi Browser) e tente novamente.', true); // Show "Tentar Novamente"
         }
     }
 
@@ -505,8 +495,7 @@
           stopCamera(); // Stop camera after successful scan
           return;
         } else {
-          // No QR found, continue scanning
-          // qrMessage.textContent = 'Aponte a câmera para o QR Code.'; // Message now handled by general 'scanning' state
+          qrMessage.textContent = 'Aponte a câmera para o QR Code.'; // Keep updating message
         }
       }
       animationFrameId = requestAnimationFrame(tick);
@@ -527,14 +516,9 @@
       if (chaveMdfe && chaveMdfe.length === 44) {
         const url = `https://dfe-portal.svrs.rs.gov.br/mdfe/qrCode?chMDFe=${chaveMdfe}&tpAmb=1`;
         
-        // Attempt redirection using the pre-authorized window if available
-        if (newWindow && !newWindow.closed) {
-            newWindow.location.href = url;
-            newWindow = null; // Clear reference
-        } else {
-            // Fallback if newWindow was blocked or closed
-            window.open(url, '_blank');
-        }
+        // Use window.open directly. In iOS, this might still require explicit user gesture recognition by the browser.
+        // It's possible the browser's own pop-up blocker will still intercept if it determines it's not a direct user action.
+        window.open(url, '_blank');
 
         campoChaveMdfe.value = chaveMdfe; // Populate the input field
         campoChaveMdfe.value = ''; // Clear the input field after successful redirection
