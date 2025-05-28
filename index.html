@@ -164,6 +164,7 @@
       height: 250px; /* Adjust as needed */
       background-color: #000;
       display: flex;
+      flex-direction: column; /* Changed to column for message */
       justify-content: center;
       align-items: center;
       color: #fff;
@@ -190,6 +191,80 @@
       color: #555555;
     }
 
+    /* Modal (Pop-up) Styles */
+    .modal {
+      display: none; /* Hidden by default */
+      position: fixed; /* Stay in place */
+      z-index: 100; /* Sit on top */
+      left: 0;
+      top: 0;
+      width: 100%; /* Full width */
+      height: 100%; /* Full height */
+      overflow: auto; /* Enable scroll if needed */
+      background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal-content {
+      background-color: #fefefe;
+      margin: auto;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+      width: 90%;
+      max-width: 350px;
+      text-align: center;
+      color: #333;
+    }
+
+    .modal-content h2 {
+      margin-bottom: 20px;
+      color: #004d38;
+      font-size: 1.5rem;
+    }
+
+    .modal-content p {
+      margin-bottom: 25px;
+      line-height: 1.5;
+      font-size: 0.95rem;
+    }
+
+    .modal-buttons {
+      display: flex;
+      justify-content: space-around;
+      gap: 15px;
+    }
+
+    .modal-buttons button {
+      flex: 1;
+      padding: 10px 15px;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+      margin-top: 0; /* Override default button margin */
+      width: auto; /* Override default button width */
+      box-shadow: none; /* Override default button shadow */
+    }
+
+    .modal-buttons .confirm-btn {
+      background-color: #007a53;
+      color: white;
+    }
+
+    .modal-buttons .confirm-btn:hover {
+      background-color: #006a4e;
+    }
+
+    .modal-buttons .cancel-btn {
+      background-color: #e9ecef;
+      color: #333;
+    }
+
+    .modal-buttons .cancel-btn:hover {
+      background-color: #dee2e6;
+    }
   </style>
 </head>
 <body>
@@ -225,6 +300,17 @@
   </div>
 
   <div class="assinatura">by Thalis Gomes</div>
+
+  <div id="cameraPermissionModal" class="modal">
+    <div class="modal-content">
+      <h2>Permissão da Câmera Necessária</h2>
+      <p>Para escanear o QR Code, precisamos acessar sua câmera. Por favor, clique em "Permitir" na solicitação do navegador.</p>
+      <div class="modal-buttons">
+        <button class="confirm-btn" id="confirmCameraAccess">Entendido</button>
+        <button class="cancel-btn" id="cancelCameraAccess">Cancelar</button>
+      </div>
+    </div>
+  </div>
 
   <script>
     function somenteNumeros(event) {
@@ -280,28 +366,49 @@
     let stream;
     let animationFrameId;
 
-    btnScanQrCode.addEventListener('click', () => {
-      // Hide the input and consult button
-      document.querySelector('.document-section').style.display = 'none';
-      qrReaderDiv.style.display = 'flex';
-      qrMessage.textContent = 'Aguardando permissão da câmera...';
+    // Modal elements
+    const cameraPermissionModal = document.getElementById('cameraPermissionModal');
+    const confirmCameraAccessBtn = document.getElementById('confirmCameraAccess');
+    const cancelCameraAccessBtn = document.getElementById('cancelCameraAccess');
 
-      // Request camera access
-      navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } }) // 'environment' prefers the back camera
-        .then((s) => {
-          stream = s;
-          qrVideo.srcObject = stream;
-          qrVideo.setAttribute('playsinline', true); // Required for iOS
-          qrVideo.play();
-          requestAnimationFrame(tick);
-        })
-        .catch((err) => {
-          console.error('Error accessing camera:', err);
-          qrMessage.textContent = 'Não foi possível acessar a câmera. Por favor, verifique as permissões.';
-          // Show the input and consult button again if camera access fails
-          document.querySelector('.document-section').style.display = 'block';
-          qrReaderDiv.style.display = 'none';
-        });
+    async function startCameraScan() {
+        // Hide the input and consult button
+        document.querySelector('.document-section').style.display = 'none';
+        qrReaderDiv.style.display = 'flex';
+        qrMessage.textContent = 'Aguardando permissão da câmera...';
+
+        try {
+            stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } }); // 'environment' prefers the back camera
+            qrVideo.srcObject = stream;
+            qrVideo.setAttribute('playsinline', true); // Required for iOS
+            qrVideo.play();
+            requestAnimationFrame(tick);
+        } catch (err) {
+            console.error('Error accessing camera:', err);
+            qrMessage.textContent = 'Não foi possível acessar a câmera. Por favor, verifique as permissões.';
+            // Show the input and consult button again if camera access fails
+            document.querySelector('.document-section').style.display = 'block';
+            qrReaderDiv.style.display = 'none';
+            alert('Acesso à câmera negado. Por favor, permita o acesso à câmera nas configurações do seu navegador para usar o scanner.');
+        }
+    }
+
+    btnScanQrCode.addEventListener('click', () => {
+        // Show the custom modal first
+        cameraPermissionModal.style.display = 'flex'; // Use flex to center the modal content
+    });
+
+    confirmCameraAccessBtn.addEventListener('click', () => {
+        cameraPermissionModal.style.display = 'none'; // Hide the modal
+        startCameraScan(); // Then attempt to start camera
+    });
+
+    cancelCameraAccessBtn.addEventListener('click', () => {
+        cameraPermissionModal.style.display = 'none'; // Hide the modal
+        // Show the input and consult button again if user cancels
+        document.querySelector('.document-section').style.display = 'block';
+        qrReaderDiv.style.display = 'none';
+        alert('Você cancelou o acesso à câmera.');
     });
 
     function tick() {
