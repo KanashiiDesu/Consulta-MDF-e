@@ -389,6 +389,7 @@
     const qrMessage = document.getElementById('qr-message'); 
     let stream;
     let animationFrameId;
+    let canvasContext; // Declare canvasContext here, at a higher scope
 
     // Modal elements
     const cameraPermissionModal = document.getElementById('cameraPermissionModal');
@@ -403,8 +404,12 @@
 
     // Function to show a general modal
     function showModal(modalElement, title, message, showTryAgain = false) {
-        if (title) modalElement.querySelector('h2').textContent = title; // Target h2 inside the modal
-        if (message) modalElement.querySelector('p').textContent = message; // Target p inside the modal
+        // Ensure to target elements within the specific modalElement
+        const modalTitleElement = modalElement.querySelector('h2');
+        const modalMessageElement = modalElement.querySelector('p');
+
+        if (modalTitleElement && title) modalTitleElement.textContent = title; 
+        if (modalMessageElement && message) modalMessageElement.textContent = message; 
         
         if (modalElement === errorModal) {
             tryAgainBtn.style.display = showTryAgain ? 'block' : 'none';
@@ -433,6 +438,11 @@
         qrReaderDiv.style.display = 'flex';
         qrMessage.textContent = 'Aponte a câmera para o QR Code.'; // Initial message in video area
 
+        // Initialize canvasContext here, once qrCanvas is guaranteed to be in the DOM
+        if (!canvasContext && qrCanvas) {
+            canvasContext = qrCanvas.getContext('2d');
+        }
+
         try {
             // Request camera access
             stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
@@ -450,6 +460,8 @@
                 errorMessage = 'Nenhuma câmera encontrada. Por favor, certifique-se de que seu dispositivo tenha uma câmera e que ela esteja funcionando.';
             } else if (err.name === 'AbortError') {
                 errorMessage = 'A câmera foi bloqueada por outro aplicativo ou dispositivo. Por favor, feche outros aplicativos que usam a câmera e tente novamente.';
+            } else if (err.name === 'NotReadableError') { // Common if camera is already in use by another tab/app
+                errorMessage = 'A câmera está sendo usada por outro aplicativo ou aba. Feche o outro aplicativo/aba e tente novamente.';
             }
             showModal(errorModal, 'Erro de Câmera!', errorMessage, true); // Show "Tentar Novamente"
         }
@@ -462,7 +474,7 @@
             if (permissionStatus.state === 'granted') {
                 startCameraScan(); // Start scanning directly
             } else {
-                showModal(cameraPermissionModal, 'Permissão da Câmera Necessária', 'Para escanear o QR Code, precisamos acessar sua câmera. Por favor, clique em "Permitir" na solicitação do navegador.'); // Ensure titles/messages are explicitly set
+                showModal(cameraPermissionModal, 'Permissão da Câmera Necessária', 'Para escanear o QR Code, precisamos acessar sua câmera. Por favor, clique em "Permitir" na solicitação do navegador.'); 
             }
         } catch (e) {
             // navigator.permissions might not be fully supported in all older/less common browsers
@@ -493,6 +505,13 @@
     });
 
     function tick() {
+      // Ensure canvasContext is defined before trying to use it
+      if (!canvasContext) {
+          console.error("canvasContext is not initialized. Stopping tick loop.");
+          stopCamera();
+          return; // Stop the loop if context is missing
+      }
+
       if (qrVideo.readyState === qrVideo.HAVE_ENOUGH_DATA) {
         qrCanvas.hidden = false;
         qrCanvas.height = qrVideo.videoHeight;
@@ -507,7 +526,7 @@
           console.log('QR Code found:', code.data);
           const scannedValue = code.data.trim();
           handleScannedValue(scannedValue);
-          stopCamera(); // Stop camera after successful scan
+          // stopCamera(); // This is called in handleScannedValue now
           return;
         } else {
           qrMessage.textContent = 'Aponte a câmera para o QR Code.'; // Keep updating message
@@ -531,8 +550,6 @@
       if (chaveMdfe && chaveMdfe.length === 44) {
         const url = `https://dfe-portal.svrs.rs.gov.br/mdfe/qrCode?chMDFe=${chaveMdfe}&tpAmb=1`;
         
-        // Use window.open directly. This is the standard behavior.
-        // If iOS or other browsers block it, the user will need to explicitly allow it.
         window.open(url, '_blank');
 
         campoChaveMdfe.value = chaveMdfe; // Populate the input field
