@@ -386,7 +386,7 @@
     const qrReaderDiv = document.getElementById('qr-reader');
     const qrVideo = document.getElementById('qr-video');
     const qrCanvas = document.getElementById('qr-canvas');
-    const qrMessage = document.getElementById('qr-message'); // Re-enabled for live message
+    const qrMessage = document.getElementById('qr-message'); 
     let stream;
     let animationFrameId;
 
@@ -403,8 +403,8 @@
 
     // Function to show a general modal
     function showModal(modalElement, title, message, showTryAgain = false) {
-        if (title) errorModalTitle.textContent = title;
-        if (message) errorModalMessage.textContent = message;
+        if (title) modalElement.querySelector('h2').textContent = title; // Target h2 inside the modal
+        if (message) modalElement.querySelector('p').textContent = message; // Target p inside the modal
         
         if (modalElement === errorModal) {
             tryAgainBtn.style.display = showTryAgain ? 'block' : 'none';
@@ -434,25 +434,40 @@
         qrMessage.textContent = 'Aponte a câmera para o QR Code.'; // Initial message in video area
 
         try {
+            // Request camera access
             stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
             qrVideo.srcObject = stream;
-            qrVideo.setAttribute('playsinline', true);
+            qrVideo.setAttribute('playsinline', true); // Required for iOS
             qrVideo.play();
             requestAnimationFrame(tick);
         } catch (err) {
             console.error('Error accessing camera:', err);
             stopCamera(); // Stop camera instantly on error
-            showModal(errorModal, 'Erro de Câmera!', 'Não foi possível acessar a câmera. Por favor, verifique as permissões do seu navegador (como o Mi Browser) e tente novamente.', true); // Show "Tentar Novamente"
+            let errorMessage = 'Não foi possível acessar a câmera. Por favor, verifique as permissões do seu navegador e tente novamente.';
+            if (err.name === 'NotAllowedError') {
+                errorMessage = 'Acesso à câmera negado. Por favor, permita o acesso à câmera nas configurações do seu navegador para usar o scanner.';
+            } else if (err.name === 'NotFoundError') {
+                errorMessage = 'Nenhuma câmera encontrada. Por favor, certifique-se de que seu dispositivo tenha uma câmera e que ela esteja funcionando.';
+            } else if (err.name === 'AbortError') {
+                errorMessage = 'A câmera foi bloqueada por outro aplicativo ou dispositivo. Por favor, feche outros aplicativos que usam a câmera e tente novamente.';
+            }
+            showModal(errorModal, 'Erro de Câmera!', errorMessage, true); // Show "Tentar Novamente"
         }
     }
 
     btnScanQrCode.addEventListener('click', async () => {
         // Check if permission is already granted
-        const permissionStatus = await navigator.permissions.query({ name: 'camera' });
-        if (permissionStatus.state === 'granted') {
-            startCameraScan(); // Start scanning directly
-        } else {
-            showModal(cameraPermissionModal); // Show custom modal
+        try {
+            const permissionStatus = await navigator.permissions.query({ name: 'camera' });
+            if (permissionStatus.state === 'granted') {
+                startCameraScan(); // Start scanning directly
+            } else {
+                showModal(cameraPermissionModal, 'Permissão da Câmera Necessária', 'Para escanear o QR Code, precisamos acessar sua câmera. Por favor, clique em "Permitir" na solicitação do navegador.'); // Ensure titles/messages are explicitly set
+            }
+        } catch (e) {
+            // navigator.permissions might not be fully supported in all older/less common browsers
+            console.warn("navigator.permissions.query not fully supported or encountered an error, falling back to direct getUserMedia call after modal.", e);
+            showModal(cameraPermissionModal, 'Permissão da Câmera Necessária', 'Para escanear o QR Code, precisamos acessar sua câmera. Por favor, clique em "Permitir" na solicitação do navegador.');
         }
     });
 
@@ -516,8 +531,8 @@
       if (chaveMdfe && chaveMdfe.length === 44) {
         const url = `https://dfe-portal.svrs.rs.gov.br/mdfe/qrCode?chMDFe=${chaveMdfe}&tpAmb=1`;
         
-        // Use window.open directly. In iOS, this might still require explicit user gesture recognition by the browser.
-        // It's possible the browser's own pop-up blocker will still intercept if it determines it's not a direct user action.
+        // Use window.open directly. This is the standard behavior.
+        // If iOS or other browsers block it, the user will need to explicitly allow it.
         window.open(url, '_blank');
 
         campoChaveMdfe.value = chaveMdfe; // Populate the input field
@@ -538,7 +553,8 @@
         cancelAnimationFrame(animationFrameId);
         animationFrameId = null;
       }
-      qrVideo.srcObject = null;
+      qrVideo.srcObject = null; // Clear video source
+      qrVideo.pause(); // Pause video element
     }
 
     // When the user navigates away or closes the page, stop the camera
