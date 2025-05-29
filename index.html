@@ -5,8 +5,7 @@
   <title>Consulta MDF-e</title>
   <link rel="icon" type="image/svg+xml" href='data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><defs><linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="%23004d38"/><stop offset="100%" stop-color="%23007a53"/></linearGradient></defs><path fill="url(%23grad)" d="M0 64C0 28.7 28.7 0 64 0L224 0l0 128c0 17.7 14.3 32 32 32l128 0 0 288c0 35.3-28.7 64-64 64L64 512c-35.3 0-64-28.7-64-64L0 64zm384 64l-128 0L256 0 384 128z"/></svg>'>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-  <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@zxing/library@0.20.0/umd/zxing.min.js"></script>
 <style>
     * {
       box-sizing: border-box;
@@ -27,20 +26,20 @@
     }
 
     .container {
-      background-color: #ffffff; 
-      padding: 35px 45px; 
-      border-radius: 15px; 
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15); 
-      max-width: 500px; 
+      background-color: #ffffff;
+      padding: 35px 45px;
+      border-radius: 15px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+      max-width: 500px;
       width: 100%;
       text-align: center;
       color: #333333;
     }
 
     h1 {
-      margin-bottom: 35px; 
+      margin-bottom: 35px;
       font-weight: 700;
-      font-size: 1.8rem; 
+      font-size: 1.8rem;
       color: #004d38;
       display: flex;
       align-items: center;
@@ -50,22 +49,22 @@
     .document-section {
         margin-bottom: 30px;
         padding: 20px;
-        background-color: #f8f9fa; 
+        background-color: #f8f9fa;
         border-radius: 10px;
-        border: 1px solid #e9ecef; 
+        border: 1px solid #e9ecef;
     }
     .document-section:last-of-type {
         margin-bottom: 0;
     }
 
     label {
-      display: flex; 
+      display: flex;
       align-items: center;
       font-weight: 600;
       margin-bottom: 12px;
-      font-size: 1.05rem; 
+      font-size: 1.05rem;
       text-align: left;
-      color: #005a40; 
+      color: #005a40;
     }
 
     .input-wrapper {
@@ -84,17 +83,17 @@
 
     input[type="text"] {
       width: 100%;
-      padding: 12px 15px 12px 40px; 
+      padding: 12px 15px 12px 40px;
       border-radius: 8px;
-      border: 1px solid #ced4da; 
+      border: 1px solid #ced4da;
       font-size: 1rem;
       color: #495057;
       background-color: #fff;
     }
 
     input[type="text"]:focus {
-      border-color: #007a53; 
-      box-shadow: 0 0 0 0.2rem rgba(0, 122, 83, 0.25); 
+      border-color: #007a53;
+      box-shadow: 0 0 0 0.2rem rgba(0, 122, 83, 0.25);
       outline: none;
     }
 
@@ -102,15 +101,15 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 10px; 
+      gap: 10px;
       margin-top: 10px;
-      padding: 12px 25px; 
-      font-size: 1rem; 
-      font-weight: 600; 
+      padding: 12px 25px;
+      font-size: 1rem;
+      font-weight: 600;
       border: none;
       border-radius: 8px;
-      background-color: #ffb700; 
-      color: #3d2800; 
+      background-color: #ffb700;
+      color: #3d2800;
       cursor: pointer;
       transition: background-color 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
       width: 100%;
@@ -118,11 +117,11 @@
     }
 
     button .fa-solid {
-        font-size: 1.1em; 
+        font-size: 1.1em;
     }
 
     button:hover {
-      background-color: #e6a200; 
+      background-color: #e6a200;
       transform: translateY(-2px);
       box-shadow: 0 4px 10px rgba(0,0,0, 0.15);
     }
@@ -133,9 +132,9 @@
     }
 
     p.info {
-      font-size: 0.8rem; 
+      font-size: 0.8rem;
       color: #555555;
-      margin-top: 10px; 
+      margin-top: 10px;
       text-align: left;
       line-height: 1.4;
     }
@@ -146,50 +145,38 @@
     }
 
     .assinatura {
-      margin-top: 30px; 
+      margin-top: 30px;
       font-size: 0.85rem;
-      color: rgba(255, 255, 255, 0.7); 
+      color: rgba(255, 255, 255, 0.7);
       font-style: italic;
       user-select: none;
       pointer-events: none;
-      font-weight: 400; 
+      font-weight: 400;
     }
 
-    /* Estilos para o stream de vídeo e canvas */
+    /* Estilos para o stream de vídeo */
     #qr-reader {
       width: 100%;
-      height: auto; /* Ajustado para auto para Quagga */
-      min-height: 250px; 
+      height: 250px; /* Ajuste conforme necessário */
       background-color: #000;
-      display: flex;
+      display: flex; /* Mantido para centralizar o vídeo se necessário, mas o vídeo cobrirá */
       flex-direction: column;
       justify-content: center;
       align-items: center;
-      color: #fff;
-      font-size: 1.2rem;
       margin-top: 20px;
       border-radius: 10px;
-      overflow: hidden;
-      position: relative; /* Para QuaggaJS desenhar sobre o vídeo */
+      overflow: hidden; /* Garante que o vídeo não ultrapasse as bordas arredondadas */
+      position: relative;
     }
 
     #qr-video {
         width: 100%;
-        max-height: 500px; /* Limite de altura para o vídeo */
-        object-fit: cover; 
-        display: block;
-    }
-    /* Canvas para QuaggaJS debug (se habilitado) */
-    #qr-reader canvas.drawingBuffer {
-        position: absolute;
-        top: 0;
-        left: 0;
+        height: 100%;
+        object-fit: cover; /* Faz o vídeo cobrir a área */
+        display: block; /* Remove espaço extra abaixo do vídeo */
     }
 
-
-    #qr-canvas { /* Canvas para jsQR, continua oculto */
-        display: none; 
-    }
+    /* O canvas não é mais necessário com ZXing-JS para esta implementação */
 
     /* Estilos gerais do Modal (reutilizados para Permissão da Câmera e Erro de Leitura) */
     .modal {
@@ -275,10 +262,10 @@
         background-color: #e6a200;
     }
 
-  </style>
+</style>
 </head>
 <body>
-  
+
   <div class="container">
     <h1>Consulta MDF-e</h1>
 
@@ -298,13 +285,13 @@
         />
       </div>
       <button id="consultar-mdfe"><i class="fa-solid fa-magnifying-glass"></i>Consultar MDF-e</button>
-      <button id="scan-qrcode" style="background-color: #007a53; color: #ffffff;"><i class="fa-solid fa-camera"></i>Escanear QR Code</button>
+      <button id="scan-code" style="background-color: #007a53; color: #ffffff;"><i class="fa-solid fa-camera"></i>Escanear Código</button>
     </div>
 
     <div id="qr-reader" style="display: none;">
         <video id="qr-video" autoplay playsinline></video>
-        <canvas id="qr-canvas"></canvas> </div>
-    
+        </div>
+
   </div>
 
   <div class="assinatura">by Thalis Gomes</div>
@@ -312,7 +299,7 @@
   <div id="cameraPermissionModal" class="modal">
     <div class="modal-content">
       <h2>Permissão da Câmera Necessária</h2>
-      <p>Para escanear o QR Code ou código de barras, precisamos acessar sua câmera. Por favor, clique em "Permitir" na solicitação do navegador.</p>
+      <p>Para escanear o código, precisamos acessar sua câmera. Por favor, clique em "Permitir" na solicitação do navegador.</p>
       <div class="modal-buttons">
         <button class="confirm-btn" id="confirmCameraAccess">Entendido</button>
         <button class="cancel-btn" id="cancelCameraAccess">Cancelar</button>
@@ -323,7 +310,7 @@
   <div id="errorModal" class="modal">
     <div class="modal-content">
       <h2 id="errorModalTitle">Erro na Leitura</h2>
-      <p id="errorModalMessage">O conteúdo escaneado não é um QR Code ou Código de Barras de MDF-e reconhecido.</p>
+      <p id="errorModalMessage">O conteúdo escaneado não é um código de MDF-e reconhecido.</p>
       <div class="modal-buttons">
         <button class="confirm-btn" id="tryAgainBtn">Tentar Novamente</button>
         <button class="cancel-btn" id="closeErrorModal">Voltar</button>
@@ -331,21 +318,24 @@
     </div>
   </div>
 
-  <script>
+<script>
     // Permite apenas números no campo de entrada
     function somenteNumeros(event) {
       const input = event.target;
       input.value = input.value.replace(/\D/g, '');
     }
 
+    // Lida com o evento de colar para garantir que apenas números sejam colados e o comprimento seja respeitado
     function handlePaste(event) {
       event.preventDefault();
       const clipboardData = event.clipboardData || window.clipboardData;
       let pastedData = clipboardData.getData('text').replace(/\D/g, '');
+
       const input = event.target;
       const start = input.selectionStart;
       const end = input.selectionEnd;
       const newValue = input.value.slice(0, start) + pastedData + input.value.slice(end);
+
       input.value = newValue.slice(0, 44);
       const newCursorPos = Math.min(start + pastedData.length, 44);
       input.setSelectionRange(newCursorPos, newCursorPos);
@@ -353,6 +343,7 @@
     }
 
     const campoChaveMdfe = document.getElementById('chave-mdfe');
+
     if (campoChaveMdfe) {
         campoChaveMdfe.addEventListener('input', somenteNumeros);
         campoChaveMdfe.addEventListener('paste', handlePaste);
@@ -366,163 +357,140 @@
         if (chave.length === 44) {
           const url = `https://dfe-portal.svrs.rs.gov.br/mdfe/qrCode?chMDFe=${chave}&tpAmb=1`;
           window.open(url, '_blank');
-          input.value = ''; 
+          input.value = ''; // Limpa o campo de entrada após a consulta
         } else {
           alert('Por favor, insira uma chave do MDF-e válida com 44 números.');
         }
       });
     }
 
-    const btnScanQrCode = document.getElementById('scan-qrcode');
+    // Lógica do Scanner com ZXing-JS
+    const btnScanCode = document.getElementById('scan-code'); // ID do botão atualizado
     const qrReaderDiv = document.getElementById('qr-reader');
-    const qrVideo = document.getElementById('qr-video');
-    const qrCanvas = document.getElementById('qr-canvas'); // Para jsQR
-    let stream; 
-    let animationFrameId; 
-    let canvasContext; 
-    let isProcessingScan = false; // Flag para evitar processamento múltiplo
+    const qrVideo = document.getElementById('qr-video'); // Video element para ZXing
 
+    let codeReader = null; // ZXing code reader instance
+    let zxingScanControls = null; // To store controls from ZXing's continuous decode
+
+    // Elementos do Modal
     const cameraPermissionModal = document.getElementById('cameraPermissionModal');
     const confirmCameraAccessBtn = document.getElementById('confirmCameraAccess');
     const cancelCameraAccessBtn = document.getElementById('cancelCameraAccess');
 
     const errorModal = document.getElementById('errorModal');
+    // errorModalTitle and errorModalMessage will be set by showModal
+
     const tryAgainBtn = document.getElementById('tryAgainBtn');
     const closeErrorModal = document.getElementById('closeErrorModal');
-    
-    const quaggaBarcodeHandler = function(result) {
-        if (isProcessingScan) return; // Já está processando um scan
 
-        const code = result.codeResult.code;
-        if (code) {
-            console.log("Barcode detected by QuaggaJS:", code);
-            handleScannedValue(code.trim());
-        }
-    };
-
+    // Função para exibir um modal genérico
     function showModal(modalElement, title, message, showTryAgain = false) {
         const modalTitleElement = modalElement.querySelector('h2');
         const modalMessageElement = modalElement.querySelector('p');
-        if (modalTitleElement && title) modalTitleElement.textContent = title; 
-        if (modalMessageElement && message) modalMessageElement.textContent = message; 
+
+        if (modalTitleElement && title) modalTitleElement.textContent = title;
+        if (modalMessageElement && message) modalMessageElement.textContent = message;
+
+        const currentTryAgainBtn = modalElement.querySelector('.confirm-btn'); // Assuming confirm-btn is try again
+        const currentCancelBtn = modalElement.querySelector('.cancel-btn'); // Assuming cancel-btn is close/cancel
+
         if (modalElement === errorModal) {
-            tryAgainBtn.style.display = showTryAgain ? 'block' : 'none';
+             if (currentTryAgainBtn) currentTryAgainBtn.style.display = showTryAgain ? 'flex' : 'none'; // Use flex for button alignment
         }
         modalElement.style.display = 'flex';
     }
 
+    // Função para esconder um modal genérico
     function hideModal(modalElement) {
         modalElement.style.display = 'none';
     }
 
+    // Função para redefinir o estado inicial (mostrar campo de entrada, esconder scanner)
     function resetToInitialState() {
         stopCamera();
         document.querySelector('.document-section').style.display = 'block';
         qrReaderDiv.style.display = 'none';
         hideModal(cameraPermissionModal);
         hideModal(errorModal);
-        campoChaveMdfe.value = ''; 
-        isProcessingScan = false; 
-        console.log("State reset to initial. isProcessingScan set to false.");
+        if(campoChaveMdfe) campoChaveMdfe.value = ''; // Garante que o campo esteja limpo
     }
 
+    // Função para iniciar o scan da câmera com ZXing-JS
     async function startCameraScan() {
-        if (isProcessingScan) return; // Evita iniciar se já estiver processando
-
         document.querySelector('.document-section').style.display = 'none';
         qrReaderDiv.style.display = 'flex';
-        isProcessingScan = false; // Garante que está falso ao iniciar
+        qrVideo.style.display = 'block'; // Make sure video element is visible
 
-        if (!canvasContext && qrCanvas) {
-            canvasContext = qrCanvas.getContext('2d', { willReadFrequently: true });
+        if (!codeReader) {
+            codeReader = new ZXing.BrowserMultiFormatReader();
         }
+        zxingScanControls = null; // Reset controls for a new session
 
         try {
-            stream = await navigator.mediaDevices.getUserMedia({ 
-                video: { 
-                    facingMode: 'environment',
-                    width: { ideal: 640 }, // Sugestão de resolução
-                    height: { ideal: 480 } 
-                } 
-            });
-            qrVideo.srcObject = stream;
-            qrVideo.setAttribute('playsinline', true); 
-            
-            // Esperar o vídeo estar pronto para Quagga
-            qrVideo.onloadedmetadata = () => {
-                qrVideo.play();
+            console.log('Iniciando escaneamento com ZXing...');
+            codeReader.decodeFromVideoDevice(undefined, qrVideo.id, (result, error, controls) => {
+                if (controls && !zxingScanControls) {
+                    zxingScanControls = controls; // Store controls for potential manual stop
+                }
 
-                // Inicializar QuaggaJS
-                Quagga.init({
-                    inputStream : {
-                        name : "Live",
-                        type : "LiveStream",
-                        target: qrVideo,
-                        constraints: {
-                            width: qrVideo.videoWidth,
-                            height: qrVideo.videoHeight,
-                            facingMode: "environment"
-                        },
-                        area: { // Área de scan (opcional, ajuste conforme necessidade)
-                            top: "20%", right: "10%", left: "10%", bottom: "20%"
+                if (result) {
+                    console.log("Código encontrado:", result.text, "Formato:", result.format.toString());
+                    if (zxingScanControls) {
+                        zxingScanControls.stop(); // Stop this specific scanning session
+                        zxingScanControls = null;
+                    }
+                    handleScannedValue(result.text.trim());
+                } else if (error) {
+                    if (error instanceof ZXing.NotFoundException) {
+                        // Normal, no code found in this frame, continue scanning
+                    } else {
+                        console.error('Erro no escaneamento ZXing:', error);
+                        if (zxingScanControls) {
+                            zxingScanControls.stop();
+                            zxingScanControls = null;
                         }
-                    },
-                    decoder : {
-                        readers : ["code_128_reader"] // Principal para MDF-e
-                    },
-                    locate: true, // Ajuda Quagga a localizar o código
-                    frequency: 10, // Tentativas de scan por segundo (ajuste para performance)
-                    debug: { // Desabilitar para produção
-                        // drawBoundingBox: true,
-                        // showFrequency: true,
-                        // drawScanline: true,
-                        // showPattern: true
+                        let errorTitle = 'Erro de Leitura!';
+                        let errorMessage = 'Ocorreu um erro ao tentar ler o código. Por favor, tente novamente.';
+
+                        if (error.name === 'NotAllowedError') {
+                            errorTitle = 'Permissão Negada!';
+                            errorMessage = 'Acesso à câmera negado. Por favor, permita o acesso nas configurações do seu navegador.';
+                        } else if (error.name === 'NotFoundError' || (error.message && error.message.toLowerCase().includes("requested device not found"))) {
+                            errorTitle = 'Câmera Não Encontrada!';
+                            errorMessage = 'Nenhuma câmera foi encontrada. Verifique se seu dispositivo possui uma câmera funcional.';
+                        } else if (error.name === 'NotReadableError' || (error.message && error.message.toLowerCase().includes("could not start video source")) || (error.message && error.message.toLowerCase().includes("already in use"))){
+                            errorTitle = 'Erro de Câmera!';
+                            errorMessage = 'Não foi possível acessar a câmera. Pode estar em uso por outro aplicativo/aba ou bloqueada. Feche outros usos e tente novamente.';
+                        } else if (error instanceof ZXing.FormatException || error instanceof ZXing.ChecksumException) {
+                            errorMessage = 'O código escaneado parece inválido ou danificado. Tente alinhar melhor ou usar um código diferente.';
+                        }
+                        showModal(errorModal, errorTitle, errorMessage, true);
                     }
-                }, function(err) {
-                    if (err) {
-                        console.error('QuaggaJS initialization failed:', err);
-                        showModal(errorModal, 'Erro no Scanner!', 'Não foi possível iniciar o leitor de código de barras. Verifique as permissões e a câmera.', true);
-                        stopCamera(); 
-                        isProcessingScan = false;
-                        return;
-                    }
-                    console.log("QuaggaJS initialization finished. Ready to start.");
-                    Quagga.start();
-                    Quagga.onDetected(quaggaBarcodeHandler);
-                });
-
-                // Iniciar loop do jsQR
-                if (animationFrameId) cancelAnimationFrame(animationFrameId); // Garante que não haja loops duplicados
-                animationFrameId = requestAnimationFrame(tick); 
-            };
-
-
-        } catch (err) {
-            console.error('Erro ao acessar a câmera ou iniciar scanners:', err);
-            stopCamera(); 
-            let errorMessage = 'Não foi possível acessar a câmera. Por favor, verifique as permissões do seu navegador e tente novamente.';
-            if (err.name === 'NotAllowedError') errorMessage = 'Acesso à câmera negado. Por favor, permita o acesso nas configurações do navegador.';
-            else if (err.name === 'NotFoundError') errorMessage = 'Nenhuma câmera encontrada. Verifique se seu dispositivo possui uma câmera funcional.';
-            else if (err.name === 'NotReadableError') errorMessage = 'A câmera está sendo usada por outro aplicativo ou aba. Feche-o e tente novamente.';
-            
-            showModal(errorModal, 'Erro de Câmera!', errorMessage, true);
-            isProcessingScan = false;
+                }
+            });
+        } catch (initialError) {
+            console.error('Erro ao iniciar o scanner ZXing:', initialError);
+            stopCamera(); // Ensure everything is reset
+            showModal(errorModal, 'Erro Crítico no Scanner', 'Falha ao iniciar o scanner: ' + initialError.message, true);
         }
     }
 
-    btnScanQrCode.addEventListener('click', async () => {
-        try {
-            const permissionStatus = await navigator.permissions.query({ name: 'camera' });
-            if (permissionStatus.state === 'granted') {
-                startCameraScan(); 
-            } else {
-                showModal(cameraPermissionModal, 'Permissão da Câmera Necessária', 'Para escanear o QR Code ou código de barras, precisamos acessar sua câmera. Por favor, clique em "Permitir" na solicitação do navegador.'); 
+    if (btnScanCode) {
+        btnScanCode.addEventListener('click', async () => {
+            try {
+                const permissionStatus = await navigator.permissions.query({ name: 'camera' });
+                if (permissionStatus.state === 'granted') {
+                    startCameraScan();
+                } else {
+                     showModal(cameraPermissionModal, 'Permissão da Câmera Necessária', 'Para escanear o código, precisamos acessar sua câmera. Por favor, clique em "Permitir" na solicitação do navegador.');
+                }
+            } catch (e) {
+                console.warn("navigator.permissions.query não suportado ou erro. Mostrando modal de permissão.", e);
+                showModal(cameraPermissionModal, 'Permissão da Câmera Necessária', 'Para escanear o código, precisamos acessar sua câmera.');
             }
-        } catch (e) {
-            console.warn("navigator.permissions.query não suportado, mostrando modal diretamente.", e);
-            showModal(cameraPermissionModal, 'Permissão da Câmera Necessária', 'Para escanear o QR Code ou código de barras, precisamos acessar sua câmera. Por favor, clique em "Permitir" na solicitação do navegador.');
-        }
-    });
+        });
+    }
+
 
     confirmCameraAccessBtn.addEventListener('click', () => {
         hideModal(cameraPermissionModal);
@@ -531,113 +499,74 @@
 
     cancelCameraAccessBtn.addEventListener('click', () => {
         hideModal(cameraPermissionModal);
-        resetToInitialState(); // Reseta para o estado inicial, limpando isProcessingScan
-        alert('Você cancelou o acesso à câmera.');
+        resetToInitialState();
+        // alert('Você cancelou o acesso à câmera.'); // Optional feedback
     });
 
     tryAgainBtn.addEventListener('click', () => {
         hideModal(errorModal);
-        isProcessingScan = false; // Permite nova tentativa
-        startCameraScan(); 
+        startCameraScan(); // Tenta escanear novamente
     });
 
     closeErrorModal.addEventListener('click', () => {
         hideModal(errorModal);
-        resetToInitialState(); // Volta ao estado inicial, limpando isProcessingScan
+        resetToInitialState(); // Volta ao estado inicial
     });
 
-    function tick() {
-      if (isProcessingScan) { // Se Quagga já pegou ou outro processo está em andamento
-          animationFrameId = requestAnimationFrame(tick); // Continue o loop para o caso de Quagga falhar
-          return;
-      }
-      if (!canvasContext) {
-          console.error("canvasContext não inicializado para jsQR.");
-          animationFrameId = requestAnimationFrame(tick); // Tenta no próximo frame
-          return; 
-      }
 
-      if (qrVideo.readyState === qrVideo.HAVE_ENOUGH_DATA) {
-        qrCanvas.height = qrVideo.videoHeight;
-        qrCanvas.width = qrVideo.videoWidth;
-        canvasContext.drawImage(qrVideo, 0, 0, qrCanvas.width, qrCanvas.height);
-        const imageData = canvasContext.getImageData(0, 0, qrCanvas.width, qrCanvas.height);
-        const code = jsQR(imageData.data, imageData.width, imageData.height, {
-          inversionAttempts: 'dontInvert',
-        });
-
-        if (code) {
-          console.log('QR Code encontrado por jsQR:', code.data);
-          handleScannedValue(code.data.trim());
-          return; // Sai do tick após encontrar código
-        }
-      }
-      if (!isProcessingScan) { // Só continua o loop do jsQR se nada foi processado ainda
-        animationFrameId = requestAnimationFrame(tick);
-      }
-    }
-
+    // Lida com o valor escaneado (chave MDF-e ou URL QR Code)
     function handleScannedValue(value) {
-      if (isProcessingScan) {
-        console.log("Scan já sendo processado, ignorando detecção:", value);
-        return;
-      }
-      isProcessingScan = true; 
-      console.log("Processando valor escaneado:", value);
-
       let chaveMdfe = '';
-      if (value.match(/^\d{44}$/)) {
-        chaveMdfe = value;
-      } 
-      else if (value.includes('chMDFe=')) {
+      const cleanedValue = value.replace(/\s+/g, ''); // Remove espaços em branco
+
+      // Verifica se é uma chave de 44 dígitos diretamente
+      if (/^\d{44}$/.test(cleanedValue)) {
+        chaveMdfe = cleanedValue;
+      }
+      // Verifica se é uma URL (comum em QR Codes) contendo o parâmetro chMDFe
+      else if (cleanedValue.includes('chMDFe=')) {
         try {
-            const urlParams = new URLSearchParams(value.substring(value.indexOf('?') + 1));
-            chaveMdfe = urlParams.get('chMDFe');
+          // Tenta extrair de uma string que pode ser uma URL completa ou parcial
+          const paramsStr = cleanedValue.includes('?') ? cleanedValue.split('?')[1] : cleanedValue;
+          const urlParams = new URLSearchParams(paramsStr);
+          chaveMdfe = urlParams.get('chMDFe');
         } catch (e) {
-            console.error("Erro ao parsear URL do QR Code:", e);
-            chaveMdfe = null; // Invalida a chave
+          console.error("Erro ao parsear parâmetros da URL do código:", e, "Valor:", cleanedValue);
+          chaveMdfe = null;
         }
       }
 
-      if (chaveMdfe && chaveMdfe.length === 44 && chaveMdfe.match(/^\d+$/)) {
+      if (chaveMdfe && /^\d{44}$/.test(chaveMdfe)) {
         const url = `https://dfe-portal.svrs.rs.gov.br/mdfe/qrCode?chMDFe=${chaveMdfe}&tpAmb=1`;
         window.open(url, '_blank');
         // campoChaveMdfe.value = chaveMdfe; // Opcional: preencher o campo
-        resetToInitialState(); 
+        resetToInitialState();
       } else {
-        console.log("Conteúdo escaneado inválido:", value);
-        stopCamera(); 
-        showModal(errorModal, 'Erro na Leitura!', 'O QR Code ou Código de Barras escaneado não é um MDF-e reconhecido. Tente novamente.', true);
-        isProcessingScan = false; // Permite nova tentativa após fechar modal de erro
+        // Scanner já foi parado pela callback do ZXing antes de chamar handleScannedValue
+        showModal(errorModal,
+                  'Código Inválido',
+                  'O código lido não contém uma chave de MDF-e de 44 números ou uma URL reconhecida. Verifique o código e tente novamente.',
+                  true); // true para mostrar "Tentar Novamente"
       }
     }
 
+    // Função para parar o stream da câmera e resetar o leitor ZXing
     function stopCamera() {
-      console.log("Parando câmera e scanners...");
-      if (stream) {
-        stream.getTracks().forEach(track => track.stop());
-        stream = null;
+      if (zxingScanControls) { // Se houver controles de uma sessão ativa
+        zxingScanControls.stop();
+        zxingScanControls = null;
+        console.log("Escaneamento ZXing interrompido via controles.");
       }
-      if (animationFrameId) {
-        cancelAnimationFrame(animationFrameId);
-        animationFrameId = null;
+      if (codeReader) {
+        codeReader.reset(); // Reseta o leitor ZXing, que para a câmera
+        console.log("Leitor ZXing resetado.");
       }
-      if (qrVideo) {
-        qrVideo.srcObject = null; 
-        qrVideo.pause();
-        qrVideo.onloadedmetadata = null; // Limpa handler
-      }
-
-      if (typeof Quagga !== 'undefined') {
-        Quagga.offDetected(quaggaBarcodeHandler); // Remove o listener específico
-        Quagga.stop();
-        console.log("QuaggaJS parado.");
-      }
-      console.log("Câmera e scanners parados.");
+      // qrVideo.style.display = 'none'; // Esconder o vídeo é feito em resetToInitialState ao esconder qrReaderDiv
     }
 
+    // Quando o usuário navega para fora ou fecha a página, para a câmera
     window.addEventListener('beforeunload', stopCamera);
 
-  </script>
+</script>
 </body>
 </html>
