@@ -5,7 +5,7 @@
   <title>Consulta MDF-e</title>
   <link rel="icon" type="image/svg+xml" href='data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><defs><linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="%23004d38"/><stop offset="100%" stop-color="%23007a53"/></linearGradient></defs><path fill="url(%23grad)" d="M0 64C0 28.7 28.7 0 64 0L224 0l0 128c0 17.7 14.3 32 32 32l128 0 0 288c0 35.3-28.7 64-64 64L64 512c-35.3 0-64-28.7-64-64L0 64zm384 64l-128 0L256 0 384 128z"/></svg>'>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-  <script src="https://cdn.jsdelivr.net/npm/@zxing/library@0.20.0/umd/zxing.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@zxing/library@0.21.3/umd/index.min.js"></script>
 <style>
     * {
       box-sizing: border-box;
@@ -202,7 +202,7 @@
 
     .modal-buttons {
       display: flex;
-      justify-content: space-around; /* Ou space-between se preferir */
+      justify-content: space-around;
       gap: 15px;
     }
 
@@ -213,9 +213,9 @@
       font-size: 0.95rem;
       cursor: pointer;
       transition: background-color 0.2s ease;
-      margin-top: 0; /* Reset margin-top para botões de modal */
-      width: auto; /* Deixa a largura ser definida pelo flex ou conteúdo */
-      box-shadow: none; /* Remove sombra de botões do modal */
+      margin-top: 0;
+      width: auto;
+      box-shadow: none;
     }
     
     .modal-buttons .confirm-btn {
@@ -234,7 +234,7 @@
       background-color: #dee2e6;
     }
 
-    #errorModal .modal-buttons .confirm-btn { /* Botão "Tentar Novamente" */
+    #errorModal .modal-buttons .confirm-btn {
         background-color: #ffb700;
         color: #3d2800;
     }
@@ -345,8 +345,8 @@
     const qrReaderDiv = document.getElementById('qr-reader');
     const qrVideo = document.getElementById('qr-video');
 
-    let codeReader = null; // Instância do leitor ZXing
-    let zxingScanControls = null; // Controles da sessão de escaneamento ZXing
+    let codeReader = null; 
+    let zxingScanControls = null; 
 
     const cameraPermissionModal = document.getElementById('cameraPermissionModal');
     const confirmCameraAccessBtn = document.getElementById('confirmCameraAccess');
@@ -363,7 +363,7 @@
         if (modalTitleElement && title) modalTitleElement.textContent = title;
         if (modalMessageElement && message) modalMessageElement.textContent = message;
 
-        const currentTryAgainBtn = modalElement.querySelector('#tryAgainBtn'); // ID específico para botão Tentar Novamente
+        const currentTryAgainBtn = modalElement.querySelector('#tryAgainBtn');
         if (modalElement === errorModal && currentTryAgainBtn) {
             currentTryAgainBtn.style.display = showTryAgain ? 'flex' : 'none';
         }
@@ -389,7 +389,6 @@
         qrReaderDiv.style.display = 'flex';
         qrVideo.style.display = 'block';
 
-        // Garante que ZXing está definido antes de usá-lo
         if (typeof ZXing === 'undefined') {
             console.error("ZXing library is not loaded!");
             showModal(errorModal, "Erro Crítico", "A biblioteca de escaneamento (ZXing) não foi carregada. Verifique a conexão com a internet e recarregue a página.", false);
@@ -399,6 +398,8 @@
 
         if (!codeReader) {
             try {
+                // Acessa o objeto ZXing diretamente do escopo global, já que o script da lib o define.
+                // Exemplo: new window.ZXing.BrowserMultiFormatReader() se houvesse conflito, mas direto é comum.
                 codeReader = new ZXing.BrowserMultiFormatReader();
             } catch (e) {
                 console.error("Falha ao instanciar ZXing.BrowserMultiFormatReader():", e);
@@ -407,15 +408,10 @@
                 return;
             }
         }
-        zxingScanControls = null; // Reseta controles para nova sessão
+        zxingScanControls = null;
 
         try {
             console.log('Iniciando escaneamento com ZXing...');
-            // Lista câmeras para debug, mas continua usando 'undefined' para o padrão
-            // codeReader.listVideoInputDevices()
-            //     .then(videoInputDevices => console.log('Câmeras disponíveis:', videoInputDevices))
-            //     .catch(err => console.warn('Não foi possível listar câmeras:', err));
-
             codeReader.decodeFromVideoDevice(undefined, qrVideo.id, (result, error, controls) => {
                 if (controls && !zxingScanControls) {
                     zxingScanControls = controls;
@@ -430,7 +426,7 @@
                     handleScannedValue(result.text.trim());
                 } else if (error) {
                     if (error instanceof ZXing.NotFoundException) {
-                        // Normal, nenhum código no frame atual, continua escaneando
+                        // Normal
                     } else {
                         console.error('Erro no escaneamento ZXing:', error.name, error.message, error);
                         if (zxingScanControls) {
@@ -451,6 +447,9 @@
                             errorMessage = 'Não foi possível acessar a câmera. Pode estar em uso por outro aplicativo/aba, bloqueada pelo sistema ou não ter permissão. Verifique e tente novamente.';
                         } else if (error instanceof ZXing.FormatException || error instanceof ZXing.ChecksumException) {
                             errorMessage = 'O código escaneado parece inválido ou danificado. Tente alinhar melhor ou usar um código diferente.';
+                        } else if (error.name === 'SecurityError' && error.message.toLowerCase().includes('secure context')) {
+                            errorTitle = 'Erro de Segurança!';
+                            errorMessage = 'O acesso à câmera só é permitido em um contexto seguro (HTTPS). Verifique se a página está sendo acessada via https://';
                         }
                         showModal(errorModal, errorTitle, errorMessage, true);
                     }
@@ -458,7 +457,7 @@
             });
         } catch (initialError) {
             console.error('Erro ao iniciar o scanner ZXing (setup):', initialError);
-            stopCamera();
+            stopCamera(); // Garante que a câmera seja parada se o setup falhar.
             showModal(errorModal, 'Erro Crítico no Scanner', 'Falha ao configurar o scanner: ' + initialError.message, true);
             resetToInitialState();
         }
@@ -466,7 +465,6 @@
 
     if (btnScanCode) {
         btnScanCode.addEventListener('click', async () => {
-            // Verifica se ZXing está carregado antes de prosseguir
             if (typeof ZXing === 'undefined') {
                  console.error("ZXing library is not loaded before scan button click!");
                  showModal(errorModal, "Erro Crítico", "A biblioteca de escaneamento (ZXing) não foi carregada. Verifique a conexão e recarregue.", false);
@@ -480,7 +478,7 @@
                     } else {
                          showModal(cameraPermissionModal, 'Permissão da Câmera Necessária', 'Para escanear o código, precisamos acessar sua câmera. Por favor, clique em "Permitir" na solicitação do navegador.');
                     }
-                } else { // Fallback para navegadores que não suportam navigator.permissions.query
+                } else { 
                     console.warn("navigator.permissions.query não suportado. Tentando acesso direto após modal.");
                     showModal(cameraPermissionModal, 'Permissão da Câmera Necessária', 'Para escanear o código, precisamos acessar sua câmera.');
                 }
@@ -548,15 +546,17 @@
       }
       if (codeReader) {
         try {
-            codeReader.reset(); // Reseta o leitor ZXing, que para a câmera
+            codeReader.reset(); 
             console.log("Leitor ZXing resetado.");
         } catch (e) {
             console.error("Erro ao resetar o leitor ZXing:", e);
         }
       }
-       // Garante que o vídeo pare de exibir o último frame
       if (qrVideo) {
         qrVideo.pause();
+        if (qrVideo.srcObject) {
+            qrVideo.srcObject.getTracks().forEach(track => track.stop());
+        }
         qrVideo.srcObject = null;
       }
     }
