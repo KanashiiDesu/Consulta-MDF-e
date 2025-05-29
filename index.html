@@ -72,7 +72,7 @@
         margin-bottom: 20px;
     }
 
-    .input-wrapper .fa-key { /* Este ícone é para o campo de entrada em si, não para o rótulo */
+    .input-wrapper .fa-key {
         position: absolute;
         left: 15px;
         top: 50%;
@@ -131,19 +131,6 @@
       box-shadow: 0 2px 5px rgba(0,0,0, 0.1);
     }
 
-    p.info {
-      font-size: 0.8rem;
-      color: #555555;
-      margin-top: 10px;
-      text-align: left;
-      line-height: 1.4;
-    }
-
-    p.info .fa-info-circle {
-        margin-right: 5px;
-        color: #007a53;
-    }
-
     .assinatura {
       margin-top: 30px;
       font-size: 0.85rem;
@@ -154,41 +141,37 @@
       font-weight: 400;
     }
 
-    /* Estilos para o stream de vídeo */
     #qr-reader {
       width: 100%;
-      height: 250px; /* Ajuste conforme necessário */
+      height: 250px;
       background-color: #000;
-      display: flex; /* Mantido para centralizar o vídeo se necessário, mas o vídeo cobrirá */
+      display: flex;
       flex-direction: column;
       justify-content: center;
       align-items: center;
       margin-top: 20px;
       border-radius: 10px;
-      overflow: hidden; /* Garante que o vídeo não ultrapasse as bordas arredondadas */
+      overflow: hidden;
       position: relative;
     }
 
     #qr-video {
         width: 100%;
         height: 100%;
-        object-fit: cover; /* Faz o vídeo cobrir a área */
-        display: block; /* Remove espaço extra abaixo do vídeo */
+        object-fit: cover;
+        display: block;
     }
 
-    /* O canvas não é mais necessário com ZXing-JS para esta implementação */
-
-    /* Estilos gerais do Modal (reutilizados para Permissão da Câmera e Erro de Leitura) */
     .modal {
-      display: none; /* Oculto por padrão */
-      position: fixed; /* Permanece no lugar */
-      z-index: 100; /* Fica no topo */
+      display: none;
+      position: fixed;
+      z-index: 100;
       left: 0;
       top: 0;
-      width: 100%; /* Largura total */
-      height: 100%; /* Altura total */
-      overflow: auto; /* Habilita rolagem se necessário */
-      background-color: rgba(0,0,0,0.4); /* Preto com opacidade */
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0,0,0,0.4);
       justify-content: center;
       align-items: center;
     }
@@ -219,7 +202,7 @@
 
     .modal-buttons {
       display: flex;
-      justify-content: space-around;
+      justify-content: space-around; /* Ou space-between se preferir */
       gap: 15px;
     }
 
@@ -230,16 +213,15 @@
       font-size: 0.95rem;
       cursor: pointer;
       transition: background-color 0.2s ease;
-      margin-top: 0;
-      width: auto;
-      box-shadow: none;
+      margin-top: 0; /* Reset margin-top para botões de modal */
+      width: auto; /* Deixa a largura ser definida pelo flex ou conteúdo */
+      box-shadow: none; /* Remove sombra de botões do modal */
     }
-
+    
     .modal-buttons .confirm-btn {
       background-color: #007a53;
       color: white;
     }
-
     .modal-buttons .confirm-btn:hover {
       background-color: #006a4e;
     }
@@ -248,20 +230,17 @@
       background-color: #e9ecef;
       color: #333;
     }
-
     .modal-buttons .cancel-btn:hover {
       background-color: #dee2e6;
     }
 
-    /* Estilo específico para o botão do modal de erro */
-    #errorModal .confirm-btn {
+    #errorModal .modal-buttons .confirm-btn { /* Botão "Tentar Novamente" */
         background-color: #ffb700;
         color: #3d2800;
     }
-    #errorModal .confirm-btn:hover {
+    #errorModal .modal-buttons .confirm-btn:hover {
         background-color: #e6a200;
     }
-
 </style>
 </head>
 <body>
@@ -290,7 +269,7 @@
 
     <div id="qr-reader" style="display: none;">
         <video id="qr-video" autoplay playsinline></video>
-        </div>
+    </div>
 
   </div>
 
@@ -319,23 +298,20 @@
   </div>
 
 <script>
-    // Permite apenas números no campo de entrada
+    // Funções de manipulação de input
     function somenteNumeros(event) {
       const input = event.target;
       input.value = input.value.replace(/\D/g, '');
     }
 
-    // Lida com o evento de colar para garantir que apenas números sejam colados e o comprimento seja respeitado
     function handlePaste(event) {
       event.preventDefault();
       const clipboardData = event.clipboardData || window.clipboardData;
       let pastedData = clipboardData.getData('text').replace(/\D/g, '');
-
       const input = event.target;
       const start = input.selectionStart;
       const end = input.selectionEnd;
       const newValue = input.value.slice(0, start) + pastedData + input.value.slice(end);
-
       input.value = newValue.slice(0, 44);
       const newCursorPos = Math.min(start + pastedData.length, 44);
       input.setSelectionRange(newCursorPos, newCursorPos);
@@ -343,12 +319,12 @@
     }
 
     const campoChaveMdfe = document.getElementById('chave-mdfe');
-
     if (campoChaveMdfe) {
         campoChaveMdfe.addEventListener('input', somenteNumeros);
         campoChaveMdfe.addEventListener('paste', handlePaste);
     }
 
+    // Consulta manual
     const btnConsultarMdfe = document.getElementById('consultar-mdfe');
     if (btnConsultarMdfe) {
       btnConsultarMdfe.addEventListener('click', () => {
@@ -357,94 +333,106 @@
         if (chave.length === 44) {
           const url = `https://dfe-portal.svrs.rs.gov.br/mdfe/qrCode?chMDFe=${chave}&tpAmb=1`;
           window.open(url, '_blank');
-          input.value = ''; // Limpa o campo de entrada após a consulta
+          input.value = '';
         } else {
           alert('Por favor, insira uma chave do MDF-e válida com 44 números.');
         }
       });
     }
 
-    // Lógica do Scanner com ZXing-JS
-    const btnScanCode = document.getElementById('scan-code'); // ID do botão atualizado
+    // Elementos do Scanner e Modais
+    const btnScanCode = document.getElementById('scan-code');
     const qrReaderDiv = document.getElementById('qr-reader');
-    const qrVideo = document.getElementById('qr-video'); // Video element para ZXing
+    const qrVideo = document.getElementById('qr-video');
 
-    let codeReader = null; // ZXing code reader instance
-    let zxingScanControls = null; // To store controls from ZXing's continuous decode
+    let codeReader = null; // Instância do leitor ZXing
+    let zxingScanControls = null; // Controles da sessão de escaneamento ZXing
 
-    // Elementos do Modal
     const cameraPermissionModal = document.getElementById('cameraPermissionModal');
     const confirmCameraAccessBtn = document.getElementById('confirmCameraAccess');
     const cancelCameraAccessBtn = document.getElementById('cancelCameraAccess');
 
     const errorModal = document.getElementById('errorModal');
-    // errorModalTitle and errorModalMessage will be set by showModal
-
     const tryAgainBtn = document.getElementById('tryAgainBtn');
     const closeErrorModal = document.getElementById('closeErrorModal');
 
-    // Função para exibir um modal genérico
+    // Funções de controle de Modal
     function showModal(modalElement, title, message, showTryAgain = false) {
         const modalTitleElement = modalElement.querySelector('h2');
         const modalMessageElement = modalElement.querySelector('p');
-
         if (modalTitleElement && title) modalTitleElement.textContent = title;
         if (modalMessageElement && message) modalMessageElement.textContent = message;
 
-        const currentTryAgainBtn = modalElement.querySelector('.confirm-btn'); // Assuming confirm-btn is try again
-        const currentCancelBtn = modalElement.querySelector('.cancel-btn'); // Assuming cancel-btn is close/cancel
-
-        if (modalElement === errorModal) {
-             if (currentTryAgainBtn) currentTryAgainBtn.style.display = showTryAgain ? 'flex' : 'none'; // Use flex for button alignment
+        const currentTryAgainBtn = modalElement.querySelector('#tryAgainBtn'); // ID específico para botão Tentar Novamente
+        if (modalElement === errorModal && currentTryAgainBtn) {
+            currentTryAgainBtn.style.display = showTryAgain ? 'flex' : 'none';
         }
         modalElement.style.display = 'flex';
     }
 
-    // Função para esconder um modal genérico
     function hideModal(modalElement) {
         modalElement.style.display = 'none';
     }
 
-    // Função para redefinir o estado inicial (mostrar campo de entrada, esconder scanner)
     function resetToInitialState() {
         stopCamera();
         document.querySelector('.document-section').style.display = 'block';
         qrReaderDiv.style.display = 'none';
         hideModal(cameraPermissionModal);
         hideModal(errorModal);
-        if(campoChaveMdfe) campoChaveMdfe.value = ''; // Garante que o campo esteja limpo
+        if(campoChaveMdfe) campoChaveMdfe.value = '';
     }
 
-    // Função para iniciar o scan da câmera com ZXing-JS
+    // Lógica de Escaneamento com ZXing-JS
     async function startCameraScan() {
         document.querySelector('.document-section').style.display = 'none';
         qrReaderDiv.style.display = 'flex';
-        qrVideo.style.display = 'block'; // Make sure video element is visible
+        qrVideo.style.display = 'block';
+
+        // Garante que ZXing está definido antes de usá-lo
+        if (typeof ZXing === 'undefined') {
+            console.error("ZXing library is not loaded!");
+            showModal(errorModal, "Erro Crítico", "A biblioteca de escaneamento (ZXing) não foi carregada. Verifique a conexão com a internet e recarregue a página.", false);
+            resetToInitialState();
+            return;
+        }
 
         if (!codeReader) {
-            codeReader = new ZXing.BrowserMultiFormatReader();
+            try {
+                codeReader = new ZXing.BrowserMultiFormatReader();
+            } catch (e) {
+                console.error("Falha ao instanciar ZXing.BrowserMultiFormatReader():", e);
+                showModal(errorModal, "Erro Crítico", "Falha ao iniciar o leitor de código: " + e.message, false);
+                resetToInitialState();
+                return;
+            }
         }
-        zxingScanControls = null; // Reset controls for a new session
+        zxingScanControls = null; // Reseta controles para nova sessão
 
         try {
             console.log('Iniciando escaneamento com ZXing...');
+            // Lista câmeras para debug, mas continua usando 'undefined' para o padrão
+            // codeReader.listVideoInputDevices()
+            //     .then(videoInputDevices => console.log('Câmeras disponíveis:', videoInputDevices))
+            //     .catch(err => console.warn('Não foi possível listar câmeras:', err));
+
             codeReader.decodeFromVideoDevice(undefined, qrVideo.id, (result, error, controls) => {
                 if (controls && !zxingScanControls) {
-                    zxingScanControls = controls; // Store controls for potential manual stop
+                    zxingScanControls = controls;
                 }
 
                 if (result) {
                     console.log("Código encontrado:", result.text, "Formato:", result.format.toString());
                     if (zxingScanControls) {
-                        zxingScanControls.stop(); // Stop this specific scanning session
+                        zxingScanControls.stop();
                         zxingScanControls = null;
                     }
                     handleScannedValue(result.text.trim());
                 } else if (error) {
                     if (error instanceof ZXing.NotFoundException) {
-                        // Normal, no code found in this frame, continue scanning
+                        // Normal, nenhum código no frame atual, continua escaneando
                     } else {
-                        console.error('Erro no escaneamento ZXing:', error);
+                        console.error('Erro no escaneamento ZXing:', error.name, error.message, error);
                         if (zxingScanControls) {
                             zxingScanControls.stop();
                             zxingScanControls = null;
@@ -458,9 +446,9 @@
                         } else if (error.name === 'NotFoundError' || (error.message && error.message.toLowerCase().includes("requested device not found"))) {
                             errorTitle = 'Câmera Não Encontrada!';
                             errorMessage = 'Nenhuma câmera foi encontrada. Verifique se seu dispositivo possui uma câmera funcional.';
-                        } else if (error.name === 'NotReadableError' || (error.message && error.message.toLowerCase().includes("could not start video source")) || (error.message && error.message.toLowerCase().includes("already in use"))){
+                        } else if (error.name === 'NotReadableError' || (error.message && (error.message.toLowerCase().includes("could not start video source") || error.message.toLowerCase().includes("already in use") || error.message.toLowerCase().includes("permission denied by system")) ) ){
                             errorTitle = 'Erro de Câmera!';
-                            errorMessage = 'Não foi possível acessar a câmera. Pode estar em uso por outro aplicativo/aba ou bloqueada. Feche outros usos e tente novamente.';
+                            errorMessage = 'Não foi possível acessar a câmera. Pode estar em uso por outro aplicativo/aba, bloqueada pelo sistema ou não ter permissão. Verifique e tente novamente.';
                         } else if (error instanceof ZXing.FormatException || error instanceof ZXing.ChecksumException) {
                             errorMessage = 'O código escaneado parece inválido ou danificado. Tente alinhar melhor ou usar um código diferente.';
                         }
@@ -469,28 +457,39 @@
                 }
             });
         } catch (initialError) {
-            console.error('Erro ao iniciar o scanner ZXing:', initialError);
-            stopCamera(); // Ensure everything is reset
-            showModal(errorModal, 'Erro Crítico no Scanner', 'Falha ao iniciar o scanner: ' + initialError.message, true);
+            console.error('Erro ao iniciar o scanner ZXing (setup):', initialError);
+            stopCamera();
+            showModal(errorModal, 'Erro Crítico no Scanner', 'Falha ao configurar o scanner: ' + initialError.message, true);
+            resetToInitialState();
         }
     }
 
     if (btnScanCode) {
         btnScanCode.addEventListener('click', async () => {
+            // Verifica se ZXing está carregado antes de prosseguir
+            if (typeof ZXing === 'undefined') {
+                 console.error("ZXing library is not loaded before scan button click!");
+                 showModal(errorModal, "Erro Crítico", "A biblioteca de escaneamento (ZXing) não foi carregada. Verifique a conexão e recarregue.", false);
+                 return;
+            }
             try {
-                const permissionStatus = await navigator.permissions.query({ name: 'camera' });
-                if (permissionStatus.state === 'granted') {
-                    startCameraScan();
-                } else {
-                     showModal(cameraPermissionModal, 'Permissão da Câmera Necessária', 'Para escanear o código, precisamos acessar sua câmera. Por favor, clique em "Permitir" na solicitação do navegador.');
+                if (navigator.permissions && navigator.permissions.query) {
+                    const permissionStatus = await navigator.permissions.query({ name: 'camera' });
+                    if (permissionStatus.state === 'granted') {
+                        startCameraScan();
+                    } else {
+                         showModal(cameraPermissionModal, 'Permissão da Câmera Necessária', 'Para escanear o código, precisamos acessar sua câmera. Por favor, clique em "Permitir" na solicitação do navegador.');
+                    }
+                } else { // Fallback para navegadores que não suportam navigator.permissions.query
+                    console.warn("navigator.permissions.query não suportado. Tentando acesso direto após modal.");
+                    showModal(cameraPermissionModal, 'Permissão da Câmera Necessária', 'Para escanear o código, precisamos acessar sua câmera.');
                 }
             } catch (e) {
-                console.warn("navigator.permissions.query não suportado ou erro. Mostrando modal de permissão.", e);
+                console.warn("Erro ao verificar permissões da câmera, mostrando modal:", e);
                 showModal(cameraPermissionModal, 'Permissão da Câmera Necessária', 'Para escanear o código, precisamos acessar sua câmera.');
             }
         });
     }
-
 
     confirmCameraAccessBtn.addEventListener('click', () => {
         hideModal(cameraPermissionModal);
@@ -500,33 +499,26 @@
     cancelCameraAccessBtn.addEventListener('click', () => {
         hideModal(cameraPermissionModal);
         resetToInitialState();
-        // alert('Você cancelou o acesso à câmera.'); // Optional feedback
     });
 
     tryAgainBtn.addEventListener('click', () => {
         hideModal(errorModal);
-        startCameraScan(); // Tenta escanear novamente
+        startCameraScan();
     });
 
     closeErrorModal.addEventListener('click', () => {
         hideModal(errorModal);
-        resetToInitialState(); // Volta ao estado inicial
+        resetToInitialState();
     });
 
-
-    // Lida com o valor escaneado (chave MDF-e ou URL QR Code)
     function handleScannedValue(value) {
       let chaveMdfe = '';
-      const cleanedValue = value.replace(/\s+/g, ''); // Remove espaços em branco
+      const cleanedValue = value.replace(/\s+/g, '');
 
-      // Verifica se é uma chave de 44 dígitos diretamente
       if (/^\d{44}$/.test(cleanedValue)) {
         chaveMdfe = cleanedValue;
-      }
-      // Verifica se é uma URL (comum em QR Codes) contendo o parâmetro chMDFe
-      else if (cleanedValue.includes('chMDFe=')) {
+      } else if (cleanedValue.includes('chMDFe=')) {
         try {
-          // Tenta extrair de uma string que pode ser uma URL completa ou parcial
           const paramsStr = cleanedValue.includes('?') ? cleanedValue.split('?')[1] : cleanedValue;
           const urlParams = new URLSearchParams(paramsStr);
           chaveMdfe = urlParams.get('chMDFe');
@@ -539,34 +531,37 @@
       if (chaveMdfe && /^\d{44}$/.test(chaveMdfe)) {
         const url = `https://dfe-portal.svrs.rs.gov.br/mdfe/qrCode?chMDFe=${chaveMdfe}&tpAmb=1`;
         window.open(url, '_blank');
-        // campoChaveMdfe.value = chaveMdfe; // Opcional: preencher o campo
         resetToInitialState();
       } else {
-        // Scanner já foi parado pela callback do ZXing antes de chamar handleScannedValue
         showModal(errorModal,
                   'Código Inválido',
                   'O código lido não contém uma chave de MDF-e de 44 números ou uma URL reconhecida. Verifique o código e tente novamente.',
-                  true); // true para mostrar "Tentar Novamente"
+                  true);
       }
     }
 
-    // Função para parar o stream da câmera e resetar o leitor ZXing
     function stopCamera() {
-      if (zxingScanControls) { // Se houver controles de uma sessão ativa
+      if (zxingScanControls) {
         zxingScanControls.stop();
         zxingScanControls = null;
         console.log("Escaneamento ZXing interrompido via controles.");
       }
       if (codeReader) {
-        codeReader.reset(); // Reseta o leitor ZXing, que para a câmera
-        console.log("Leitor ZXing resetado.");
+        try {
+            codeReader.reset(); // Reseta o leitor ZXing, que para a câmera
+            console.log("Leitor ZXing resetado.");
+        } catch (e) {
+            console.error("Erro ao resetar o leitor ZXing:", e);
+        }
       }
-      // qrVideo.style.display = 'none'; // Esconder o vídeo é feito em resetToInitialState ao esconder qrReaderDiv
+       // Garante que o vídeo pare de exibir o último frame
+      if (qrVideo) {
+        qrVideo.pause();
+        qrVideo.srcObject = null;
+      }
     }
 
-    // Quando o usuário navega para fora ou fecha a página, para a câmera
     window.addEventListener('beforeunload', stopCamera);
-
 </script>
 </body>
 </html>
