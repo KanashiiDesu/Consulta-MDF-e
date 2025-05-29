@@ -331,11 +331,16 @@
         const input = document.getElementById('chave-mdfe');
         const chave = input.value.trim();
         if (chave.length === 44) {
-          const url = `https://dfe-portal.svrs.rs.gov.br/mdfe/qrCode?chMDFe=${chave}&tpAmb=1`;
-          window.open(url, '_blank');
-          input.value = '';
+          const modeloDocumento = chave.substring(20, 22);
+          if (modeloDocumento === '58') {
+            const url = `https://dfe-portal.svrs.rs.gov.br/mdfe/qrCode?chMDFe=${chave}&tpAmb=1`;
+            window.open(url, '_blank');
+            input.value = '';
+          } else {
+            alert(`A chave inserida (modelo ${modeloDocumento}) não é de um MDF-e (modelo 58). Verifique a chave.`);
+          }
         } else {
-          alert('Por favor, insira uma chave do MDF-e válida com 44 números.');
+          alert('Por favor, insira uma chave de acesso válida com 44 números.');
         }
       });
     }
@@ -398,8 +403,6 @@
 
         if (!codeReader) {
             try {
-                // Acessa o objeto ZXing diretamente do escopo global, já que o script da lib o define.
-                // Exemplo: new window.ZXing.BrowserMultiFormatReader() se houvesse conflito, mas direto é comum.
                 codeReader = new ZXing.BrowserMultiFormatReader();
             } catch (e) {
                 console.error("Falha ao instanciar ZXing.BrowserMultiFormatReader():", e);
@@ -457,7 +460,7 @@
             });
         } catch (initialError) {
             console.error('Erro ao iniciar o scanner ZXing (setup):', initialError);
-            stopCamera(); // Garante que a câmera seja parada se o setup falhar.
+            stopCamera();
             showModal(errorModal, 'Erro Crítico no Scanner', 'Falha ao configurar o scanner: ' + initialError.message, true);
             resetToInitialState();
         }
@@ -501,7 +504,7 @@
 
     tryAgainBtn.addEventListener('click', () => {
         hideModal(errorModal);
-        startCameraScan();
+        startCameraScan(); // Tenta escanear novamente, a validação de modelo ocorrerá em handleScannedValue
     });
 
     closeErrorModal.addEventListener('click', () => {
@@ -509,34 +512,68 @@
         resetToInitialState();
     });
 
+    // --- FUNÇÃO ATUALIZADA ---
     function handleScannedValue(value) {
-      let chaveMdfe = '';
-      const cleanedValue = value.replace(/\s+/g, '');
+        let chaveFiscal = ''; 
+        const cleanedValue = value.replace(/\s+/g, '');
 
-      if (/^\d{44}$/.test(cleanedValue)) {
-        chaveMdfe = cleanedValue;
-      } else if (cleanedValue.includes('chMDFe=')) {
-        try {
-          const paramsStr = cleanedValue.includes('?') ? cleanedValue.split('?')[1] : cleanedValue;
-          const urlParams = new URLSearchParams(paramsStr);
-          chaveMdfe = urlParams.get('chMDFe');
-        } catch (e) {
-          console.error("Erro ao parsear parâmetros da URL do código:", e, "Valor:", cleanedValue);
-          chaveMdfe = null;
+        // Tenta extrair a chave de 44 dígitos
+        if (/^\d{44}$/.test(cleanedValue)) {
+            chaveFiscal = cleanedValue;
+        } else if (cleanedValue.includes('chMDFe=') || cleanedValue.includes('chCTe=') || cleanedValue.includes('chNFe=')) {
+            try {
+                const paramsStr = cleanedValue.includes('?') ? cleanedValue.split('?')[1] : cleanedValue;
+                const urlParams = new URLSearchParams(paramsStr);
+                if (urlParams.has('chMDFe')) {
+                    chaveFiscal = urlParams.get('chMDFe');
+                } else if (urlParams.has('chCTe')) {
+                    chaveFiscal = urlParams.get('chCTe');
+                } else if (urlParams.has('chNFe')) {
+                    chaveFiscal = urlParams.get('chNFe');
+                }
+                // Limpa novamente caso o parâmetro da URL tenha espaços (improvável, mas seguro)
+                if (chaveFiscal) chaveFiscal = chaveFiscal.replace(/\s+/g, '');
+
+            } catch (e) {
+                console.error("Erro ao parsear parâmetros da URL do código:", e, "Valor:", cleanedValue);
+                chaveFiscal = null;
+            }
         }
-      }
 
-      if (chaveMdfe && /^\d{44}$/.test(chaveMdfe)) {
-        const url = `https://dfe-portal.svrs.rs.gov.br/mdfe/qrCode?chMDFe=${chaveMdfe}&tpAmb=1`;
-        window.open(url, '_blank');
-        resetToInitialState();
-      } else {
-        showModal(errorModal,
-                  'Código Inválido',
-                  'O código lido não contém uma chave de MDF-e de 44 números ou uma URL reconhecida. Verifique o código e tente novamente.',
-                  true);
-      }
+        if (chaveFiscal && /^\d{44}$/.test(chaveFiscal)) {
+            const modeloDocumento = chaveFiscal.substring(20, 22); // Modelo do documento (posições 21 e 22)
+
+            if (modeloDocumento === '58') { // Modelo 58 é MDF-e
+                const url = `https://dfe-portal.svrs.rs.gov.br/mdfe/qrCode?chMDFe=${chaveFiscal}&tpAmb=1`;
+                window.open(url, '_blank');
+                resetToInitialState();
+            } else if (modeloDocumento === '57') { // Modelo 57 é CT-e
+                console.log("CT-e escaneado:", chaveFiscal);
+                showModal(errorModal,
+                          'Documento Não Suportado',
+                          'Este é um código de CT-e (Conhecimento de Transporte). Este consultor é específico para MDF-e (modelo 58).',
+                          true); // Permite "Tentar Novamente"
+            } else if (modeloDocumento === '55') { // Modelo 55 é NF-e
+                console.log("NF-e escaneada:", chaveFiscal);
+                showModal(errorModal,
+                          'Documento Não Suportado',
+                          'Este é um código de NF-e (Nota Fiscal). Este consultor é específico para MDF-e (modelo 58).',
+                          true);
+            } else { // Outros modelos ou chave que não corresponde a um documento conhecido aqui
+                console.log("Documento de modelo desconhecido ou chave inválida escaneada:", chaveFiscal, "Modelo:", modeloDocumento);
+                showModal(errorModal,
+                          'Código Inválido ou Não Suportado',
+                          `O código lido (modelo ${modeloDocumento || 'desconhecido'}) não é um MDF-e (modelo 58). Por favor, escaneie um código de MDF-e.`,
+                          true);
+            }
+        } else { // Não é uma chave de 44 dígitos válida ou falhou ao extrair
+            showModal(errorModal,
+                      'Código Inválido',
+                      'O código lido não parece ser uma chave de acesso válida de documento fiscal eletrônico (44 dígitos). Verifique o código e tente novamente.',
+                      true);
+        }
     }
+    // --- FIM DA FUNÇÃO ATUALIZADA ---
 
     function stopCamera() {
       if (zxingScanControls) {
