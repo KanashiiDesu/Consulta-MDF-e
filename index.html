@@ -2,6 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Consulta MDF-e</title>
   <link rel="icon" type="image/svg+xml" href='data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><defs><linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="%23004d38"/><stop offset="100%" stop-color="%23007a53"/></linearGradient></defs><path fill="url(%23grad)" d="M0 64C0 28.7 28.7 0 64 0L224 0l0 128c0 17.7 14.3 32 32 32l128 0 0 288c0 35.3-28.7 64-64 64L64 512c-35.3 0-64-28.7-64-64L0 64zm384 64l-128 0L256 0 384 128z"/></svg>'>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
@@ -22,24 +23,25 @@
       justify-content: center;
       align-items: center;
       color: #ffffff;
-      padding: 20px;
+      padding: 10px; /* Ajustado para telas menores */
     }
 
     .container {
       background-color: #ffffff;
-      padding: 35px 45px;
+      padding: 25px 20px; /* Ajustado para telas menores */
       border-radius: 15px;
       box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
       max-width: 500px;
       width: 100%;
       text-align: center;
       color: #333333;
+      margin: 10px 0; /* Adicionada margem vertical */
     }
 
     h1 {
-      margin-bottom: 35px;
+      margin-bottom: 25px; /* Ajustado */
       font-weight: 700;
-      font-size: 1.8rem;
+      font-size: 1.6rem; /* Ajustado */
       color: #004d38;
       display: flex;
       align-items: center;
@@ -47,8 +49,8 @@
     }
 
     .document-section {
-        margin-bottom: 30px;
-        padding: 20px;
+        margin-bottom: 20px; /* Ajustado */
+        padding: 15px; /* Ajustado */
         background-color: #f8f9fa;
         border-radius: 10px;
         border: 1px solid #e9ecef;
@@ -61,32 +63,32 @@
       display: flex;
       align-items: center;
       font-weight: 600;
-      margin-bottom: 12px;
-      font-size: 1.05rem;
+      margin-bottom: 10px; /* Ajustado */
+      font-size: 1rem; /* Ajustado */
       text-align: left;
       color: #005a40;
     }
 
     .input-wrapper {
         position: relative;
-        margin-bottom: 20px;
+        margin-bottom: 15px; /* Ajustado */
     }
 
     .input-wrapper .fa-key {
         position: absolute;
-        left: 15px;
+        left: 12px; /* Ajustado */
         top: 50%;
         transform: translateY(-50%);
         color: #007a53;
-        font-size: 0.9rem;
+        font-size: 0.85rem; /* Ajustado */
     }
 
     input[type="text"] {
       width: 100%;
-      padding: 12px 15px 12px 40px;
+      padding: 10px 15px 10px 35px; /* Ajustado */
       border-radius: 8px;
       border: 1px solid #ced4da;
-      font-size: 1rem;
+      font-size: 0.95rem; /* Ajustado */
       color: #495057;
       background-color: #fff;
     }
@@ -101,10 +103,10 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 10px;
+      gap: 8px; /* Ajustado */
       margin-top: 10px;
-      padding: 12px 25px;
-      font-size: 1rem;
+      padding: 10px 20px; /* Ajustado */
+      font-size: 0.95rem; /* Ajustado */
       font-weight: 600;
       border: none;
       border-radius: 8px;
@@ -117,7 +119,7 @@
     }
 
     button .fa-solid {
-        font-size: 1.1em;
+        font-size: 1em; /* Ajustado */
     }
 
     button:hover {
@@ -132,8 +134,8 @@
     }
 
     .assinatura {
-      margin-top: 30px;
-      font-size: 0.85rem;
+      margin-top: 25px; /* Ajustado */
+      font-size: 0.8rem; /* Ajustado */
       color: rgba(255, 255, 255, 0.7);
       font-style: italic;
       user-select: none;
@@ -143,13 +145,13 @@
 
     #qr-reader {
       width: 100%;
-      height: 250px;
+      height: 220px; /* Altura ajustada para mobile */
       background-color: #000;
       display: flex;
       flex-direction: column;
       justify-content: center;
       align-items: center;
-      margin-top: 20px;
+      margin-top: 15px; /* Ajustado */
       border-radius: 10px;
       overflow: hidden;
       position: relative;
@@ -165,52 +167,55 @@
     .modal {
       display: none;
       position: fixed;
-      z-index: 100;
+      z-index: 1000; /* Aumentado para melhor sobreposição */
       left: 0;
       top: 0;
       width: 100%;
       height: 100%;
       overflow: auto;
-      background-color: rgba(0,0,0,0.4);
+      background-color: rgba(0,0,0,0.5); /* Fundo mais escuro */
       justify-content: center;
       align-items: center;
+      padding: 10px; /* Padding para o overlay do modal */
     }
 
     .modal-content {
       background-color: #fefefe;
       margin: auto;
-      padding: 30px;
+      padding: 20px; /* Padding base do conteúdo do modal */
       border-radius: 10px;
       box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-      width: 90%;
-      max-width: 350px;
+      width: 90%; /* Responsivo em telas pequenas */
+      max-width: 350px; /* Mantido o max-width original */
       text-align: center;
       color: #333;
     }
 
     .modal-content h2 {
-      margin-bottom: 20px;
+      margin-bottom: 15px; /* Ajustado */
       color: #004d38;
-      font-size: 1.5rem;
+      font-size: 1.3rem; /* Ajustado */
     }
 
     .modal-content p {
-      margin-bottom: 25px;
+      margin-bottom: 20px; /* Ajustado */
       line-height: 1.5;
-      font-size: 0.95rem;
+      font-size: 0.9rem; /* Ajustado */
+      text-align: left; /* Mantido para melhor leitura de mensagens mais longas */
     }
 
     .modal-buttons {
       display: flex;
-      justify-content: space-around;
-      gap: 15px;
+      justify-content: space-around; /* Mantido o original, bom para 2 botões */
+      gap: 10px; /* Ajustado */
+      margin-top: 10px; /* Ajustado */
     }
 
     .modal-buttons button {
       flex: 1;
-      padding: 10px 15px;
+      padding: 8px 12px; /* Ajustado */
       border-radius: 8px;
-      font-size: 0.95rem;
+      font-size: 0.9rem; /* Ajustado */
       cursor: pointer;
       transition: background-color 0.2s ease;
       margin-top: 0;
@@ -234,13 +239,127 @@
       background-color: #dee2e6;
     }
 
-    #errorModal .modal-buttons .confirm-btn {
+    #errorModal .modal-buttons .confirm-btn { /* Específico para o errorModal do scanner */
         background-color: #ffb700;
         color: #3d2800;
     }
     #errorModal .modal-buttons .confirm-btn:hover {
         background-color: #e6a200;
     }
+
+    /* --- MEDIA QUERIES PARA RESPONSIVIDADE --- */
+    @media (min-width: 600px) { /* Estilos para telas maiores (tablets, desktops) */
+        body {
+            padding: 20px; /* Restaura padding original do body */
+        }
+        .container {
+            padding: 35px 45px; /* Restaura padding original do container */
+        }
+        h1 {
+            font-size: 1.8rem; /* Restaura tamanho original */
+            margin-bottom: 35px; /* Restaura margem original */
+        }
+        .document-section {
+            padding: 20px; /* Restaura padding original */
+            margin-bottom: 30px; /* Restaura margem original */
+        }
+        label {
+            font-size: 1.05rem; /* Restaura tamanho original */
+            margin-bottom: 12px; /* Restaura margem original */
+        }
+        .input-wrapper {
+            margin-bottom: 20px; /* Restaura margem original */
+        }
+        .input-wrapper .fa-key {
+            font-size: 0.9rem; /* Restaura tamanho original */
+            left: 15px; /* Restaura posição original */
+        }
+        input[type="text"] {
+            padding: 12px 15px 12px 40px; /* Restaura padding original */
+            font-size: 1rem; /* Restaura tamanho original */
+        }
+        button {
+            padding: 12px 25px; /* Restaura padding original */
+            font-size: 1rem; /* Restaura tamanho original */
+            gap: 10px; /* Restaura gap original */
+        }
+        button .fa-solid {
+            font-size: 1.1em; /* Restaura tamanho original */
+        }
+        .assinatura {
+            margin-top: 30px; /* Restaura margem original */
+            font-size: 0.85rem; /* Restaura tamanho original */
+        }
+        #qr-reader {
+            height: 250px; /* Restaura altura original */
+            margin-top: 20px; /* Restaura margem original */
+        }
+        .modal-content {
+            padding: 30px; /* Restaura padding original */
+        }
+        .modal-content h2 {
+            font-size: 1.5rem; /* Restaura tamanho original */
+            margin-bottom: 20px; /* Restaura margem original */
+        }
+        .modal-content p {
+            font-size: 0.95rem; /* Restaura tamanho original */
+            margin-bottom: 25px; /* Restaura margem original */
+        }
+        .modal-buttons {
+            gap: 15px; /* Restaura gap original */
+            margin-top: 0; /* Restaura margem original (se era o caso) ou ajuste fino */
+        }
+        .modal-buttons button {
+            padding: 10px 15px; /* Restaura padding original */
+            font-size: 0.95rem; /* Restaura tamanho original */
+        }
+    }
+
+    @media (max-width: 400px) { /* Ajustes finos para telas muito pequenas */
+        body {
+            padding: 5px;
+        }
+        .container {
+            padding: 20px 10px; /* Padding ainda menor */
+        }
+        h1 {
+            font-size: 1.4rem;
+            margin-bottom: 20px;
+        }
+        input[type="text"] {
+            font-size: 0.9rem;
+            padding: 10px 10px 10px 30px; /* Padding esquerdo menor para ícone */
+        }
+        .input-wrapper .fa-key {
+            font-size: 0.8rem;
+            left: 10px;
+        }
+        button {
+            font-size: 0.9rem;
+            padding: 10px 15px;
+        }
+        #qr-reader {
+            height: 180px; /* Altura ainda menor para scanner */
+        }
+        .modal-content {
+            padding: 15px;
+            width: 95%;
+        }
+        .modal-content h2 {
+            font-size: 1.2rem;
+        }
+        .modal-content p {
+            font-size: 0.85rem;
+        }
+        .modal-buttons { /* Empilha os botões do modal */
+            flex-direction: column;
+            gap: 8px;
+        }
+        .modal-buttons button {
+            width: 100%; /* Botões ocupam largura total */
+        }
+    }
+
 </style>
 </head>
 <body>
@@ -337,10 +456,15 @@
             window.open(url, '_blank');
             input.value = '';
           } else {
+            // Usando showModal para consistência, mesmo que o modal errorModal seja usado.
+            // Idealmente, você teria um modal genérico se quisesse o mesmo estilo para todos os erros.
+            // Por enquanto, mantendo o alert para diferenciar dos erros de scan.
             alert(`A chave inserida (modelo ${modeloDocumento}) não é de um MDF-e (modelo 58). Verifique a chave.`);
+            input.value = ''; // Limpa o campo após o alerta
           }
         } else {
           alert('Por favor, insira uma chave de acesso válida com 44 números.');
+          input.value = ''; // Limpa o campo após o alerta
         }
       });
     }
@@ -357,18 +481,18 @@
     const confirmCameraAccessBtn = document.getElementById('confirmCameraAccess');
     const cancelCameraAccessBtn = document.getElementById('cancelCameraAccess');
 
-    const errorModal = document.getElementById('errorModal');
+    const errorModal = document.getElementById('errorModal'); // Modal para erros de scan e validação de código escaneado
     const tryAgainBtn = document.getElementById('tryAgainBtn');
     const closeErrorModal = document.getElementById('closeErrorModal');
 
-    // Funções de controle de Modal
+    // Funções de controle de Modal (para cameraPermissionModal e errorModal)
     function showModal(modalElement, title, message, showTryAgain = false) {
         const modalTitleElement = modalElement.querySelector('h2');
         const modalMessageElement = modalElement.querySelector('p');
         if (modalTitleElement && title) modalTitleElement.textContent = title;
-        if (modalMessageElement && message) modalMessageElement.textContent = message;
+        if (modalMessageElement && message) modalMessageElement.innerHTML = message.replace(/\n/g, '<br>'); // Suporta quebras de linha
 
-        const currentTryAgainBtn = modalElement.querySelector('#tryAgainBtn');
+        const currentTryAgainBtn = modalElement.querySelector('#tryAgainBtn'); // Específico para errorModal
         if (modalElement === errorModal && currentTryAgainBtn) {
             currentTryAgainBtn.style.display = showTryAgain ? 'flex' : 'none';
         }
@@ -381,7 +505,10 @@
 
     function resetToInitialState() {
         stopCamera();
-        document.querySelector('.document-section').style.display = 'block';
+        // Garante que a seção de input/botões do MDF-e esteja visível
+        const docSection = campoChaveMdfe.closest('.document-section');
+        if (docSection) docSection.style.display = 'block';
+        
         qrReaderDiv.style.display = 'none';
         hideModal(cameraPermissionModal);
         hideModal(errorModal);
@@ -390,13 +517,16 @@
 
     // Lógica de Escaneamento com ZXing-JS
     async function startCameraScan() {
-        document.querySelector('.document-section').style.display = 'none';
+        // Esconde a seção de input/botões do MDF-e ao iniciar o scanner
+        const docSection = campoChaveMdfe.closest('.document-section');
+        if (docSection) docSection.style.display = 'none';
+
         qrReaderDiv.style.display = 'flex';
         qrVideo.style.display = 'block';
 
         if (typeof ZXing === 'undefined') {
             console.error("ZXing library is not loaded!");
-            showModal(errorModal, "Erro Crítico", "A biblioteca de escaneamento (ZXing) não foi carregada. Verifique a conexão com a internet e recarregue a página.", false);
+            showModal(errorModal, "Erro Crítico", "A biblioteca de escaneamento (ZXing) não foi carregada.<br>Verifique a conexão e recarregue.", false);
             resetToInitialState();
             return;
         }
@@ -437,24 +567,24 @@
                             zxingScanControls = null;
                         }
                         let errorTitle = 'Erro de Leitura!';
-                        let errorMessage = 'Ocorreu um erro ao tentar ler o código. Por favor, tente novamente.';
+                        let errorMessage = 'Ocorreu um erro ao tentar ler o código.<br>Por favor, tente novamente.';
 
                         if (error.name === 'NotAllowedError') {
                             errorTitle = 'Permissão Negada!';
-                            errorMessage = 'Acesso à câmera negado. Por favor, permita o acesso nas configurações do seu navegador.';
+                            errorMessage = 'Acesso à câmera negado.<br>Por favor, permita o acesso nas configurações do seu navegador.';
                         } else if (error.name === 'NotFoundError' || (error.message && error.message.toLowerCase().includes("requested device not found"))) {
                             errorTitle = 'Câmera Não Encontrada!';
-                            errorMessage = 'Nenhuma câmera foi encontrada. Verifique se seu dispositivo possui uma câmera funcional.';
+                            errorMessage = 'Nenhuma câmera foi encontrada.<br>Verifique se seu dispositivo possui uma câmera funcional.';
                         } else if (error.name === 'NotReadableError' || (error.message && (error.message.toLowerCase().includes("could not start video source") || error.message.toLowerCase().includes("already in use") || error.message.toLowerCase().includes("permission denied by system")) ) ){
                             errorTitle = 'Erro de Câmera!';
-                            errorMessage = 'Não foi possível acessar a câmera. Pode estar em uso por outro aplicativo/aba, bloqueada pelo sistema ou não ter permissão. Verifique e tente novamente.';
+                            errorMessage = 'Não foi possível acessar a câmera.<br>Pode estar em uso por outro aplicativo/aba, bloqueada pelo sistema ou não ter permissão.<br>Verifique e tente novamente.';
                         } else if (error instanceof ZXing.FormatException || error instanceof ZXing.ChecksumException) {
-                            errorMessage = 'O código escaneado parece inválido ou danificado. Tente alinhar melhor ou usar um código diferente.';
+                            errorMessage = 'O código escaneado parece inválido ou danificado.<br>Tente alinhar melhor ou usar um código diferente.';
                         } else if (error.name === 'SecurityError' && error.message.toLowerCase().includes('secure context')) {
                             errorTitle = 'Erro de Segurança!';
-                            errorMessage = 'O acesso à câmera só é permitido em um contexto seguro (HTTPS). Verifique se a página está sendo acessada via https://';
+                            errorMessage = 'O acesso à câmera só é permitido em um contexto seguro (HTTPS).<br>Verifique se a página está sendo acessada via https://';
                         }
-                        showModal(errorModal, errorTitle, errorMessage, true);
+                        showModal(errorModal, errorTitle, errorMessage, true); // true para "Tentar Novamente"
                     }
                 }
             });
@@ -470,7 +600,7 @@
         btnScanCode.addEventListener('click', async () => {
             if (typeof ZXing === 'undefined') {
                  console.error("ZXing library is not loaded before scan button click!");
-                 showModal(errorModal, "Erro Crítico", "A biblioteca de escaneamento (ZXing) não foi carregada. Verifique a conexão e recarregue.", false);
+                 showModal(errorModal, "Erro Crítico", "A biblioteca de escaneamento (ZXing) não foi carregada.<br>Verifique a conexão e recarregue.", false);
                  return;
             }
             try {
@@ -479,11 +609,11 @@
                     if (permissionStatus.state === 'granted') {
                         startCameraScan();
                     } else {
-                         showModal(cameraPermissionModal, 'Permissão da Câmera Necessária', 'Para escanear o código, precisamos acessar sua câmera. Por favor, clique em "Permitir" na solicitação do navegador.');
+                         showModal(cameraPermissionModal, 'Permissão da Câmera Necessária', 'Para escanear o código, precisamos acessar sua câmera.<br>Por favor, clique em "Permitir" na solicitação do navegador.');
                     }
                 } else { 
                     console.warn("navigator.permissions.query não suportado. Tentando acesso direto após modal.");
-                    showModal(cameraPermissionModal, 'Permissão da Câmera Necessária', 'Para escanear o código, precisamos acessar sua câmera.');
+                    showModal(cameraPermissionModal, 'Permissão da Câmera Necessária', 'Para escanear o código, precisamos acessar sua câmera.<br>Por favor, clique em "Permitir".');
                 }
             } catch (e) {
                 console.warn("Erro ao verificar permissões da câmera, mostrando modal:", e);
@@ -504,7 +634,7 @@
 
     tryAgainBtn.addEventListener('click', () => {
         hideModal(errorModal);
-        startCameraScan(); // Tenta escanear novamente, a validação de modelo ocorrerá em handleScannedValue
+        startCameraScan(); 
     });
 
     closeErrorModal.addEventListener('click', () => {
@@ -512,26 +642,23 @@
         resetToInitialState();
     });
 
-    // --- FUNÇÃO ATUALIZADA ---
     function handleScannedValue(value) {
         let chaveFiscal = ''; 
         const cleanedValue = value.replace(/\s+/g, '');
 
-        // Tenta extrair a chave de 44 dígitos
         if (/^\d{44}$/.test(cleanedValue)) {
             chaveFiscal = cleanedValue;
-        } else if (cleanedValue.includes('chMDFe=') || cleanedValue.includes('chCTe=') || cleanedValue.includes('chNFe=')) {
+        } else if (cleanedValue.includes('chMDFe=') || cleanedValue.includes('chCTe=') || cleanedValue.includes('chNFe=')) { // Procura por chaves comuns
             try {
                 const paramsStr = cleanedValue.includes('?') ? cleanedValue.split('?')[1] : cleanedValue;
                 const urlParams = new URLSearchParams(paramsStr);
                 if (urlParams.has('chMDFe')) {
                     chaveFiscal = urlParams.get('chMDFe');
-                } else if (urlParams.has('chCTe')) {
+                } else if (urlParams.has('chCTe')) { // Adicionado para robustez, embora não usado para redirecionamento
                     chaveFiscal = urlParams.get('chCTe');
-                } else if (urlParams.has('chNFe')) {
+                } else if (urlParams.has('chNFe')) { // Adicionado para robustez
                     chaveFiscal = urlParams.get('chNFe');
                 }
-                // Limpa novamente caso o parâmetro da URL tenha espaços (improvável, mas seguro)
                 if (chaveFiscal) chaveFiscal = chaveFiscal.replace(/\s+/g, '');
 
             } catch (e) {
@@ -541,39 +668,30 @@
         }
 
         if (chaveFiscal && /^\d{44}$/.test(chaveFiscal)) {
-            const modeloDocumento = chaveFiscal.substring(20, 22); // Modelo do documento (posições 21 e 22)
+            const modeloDocumento = chaveFiscal.substring(20, 22);
 
             if (modeloDocumento === '58') { // Modelo 58 é MDF-e
                 const url = `https://dfe-portal.svrs.rs.gov.br/mdfe/qrCode?chMDFe=${chaveFiscal}&tpAmb=1`;
                 window.open(url, '_blank');
-                resetToInitialState();
-            } else if (modeloDocumento === '57') { // Modelo 57 é CT-e
-                console.log("CT-e escaneado:", chaveFiscal);
+                resetToInitialState(); // Volta ao estado inicial após abrir o link
+            } else { 
+                // Para qualquer outro modelo escaneado que não seja 58
+                let nomeDocumento = `Documento (modelo ${modeloDocumento})`;
+                if(modeloDocumento === '57') nomeDocumento = 'CT-e (Conhecimento de Transporte)';
+                else if(modeloDocumento === '55') nomeDocumento = 'NF-e (Nota Fiscal)';
+
                 showModal(errorModal,
                           'Documento Não Suportado',
-                          'Este é um código de CT-e (Conhecimento de Transporte). Este consultor é específico para MDF-e (modelo 58).',
-                          true); // Permite "Tentar Novamente"
-            } else if (modeloDocumento === '55') { // Modelo 55 é NF-e
-                console.log("NF-e escaneada:", chaveFiscal);
-                showModal(errorModal,
-                          'Documento Não Suportado',
-                          'Este é um código de NF-e (Nota Fiscal). Este consultor é específico para MDF-e (modelo 58).',
-                          true);
-            } else { // Outros modelos ou chave que não corresponde a um documento conhecido aqui
-                console.log("Documento de modelo desconhecido ou chave inválida escaneada:", chaveFiscal, "Modelo:", modeloDocumento);
-                showModal(errorModal,
-                          'Código Inválido ou Não Suportado',
-                          `O código lido (modelo ${modeloDocumento || 'desconhecido'}) não é um MDF-e (modelo 58). Por favor, escaneie um código de MDF-e.`,
-                          true);
+                          `Este é um código de ${nomeDocumento}.<br>Este consultor é específico para MDF-e (modelo 58).`,
+                          true); // Permite "Tentar Novamente" o scan
             }
-        } else { // Não é uma chave de 44 dígitos válida ou falhou ao extrair
+        } else { 
             showModal(errorModal,
                       'Código Inválido',
-                      'O código lido não parece ser uma chave de acesso válida de documento fiscal eletrônico (44 dígitos). Verifique o código e tente novamente.',
+                      'O código lido não parece ser uma chave de acesso válida (44 dígitos) ou URL reconhecida.<br>Verifique o código e tente novamente.',
                       true);
         }
     }
-    // --- FIM DA FUNÇÃO ATUALIZADA ---
 
     function stopCamera() {
       if (zxingScanControls) {
