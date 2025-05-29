@@ -55,9 +55,9 @@
         border-radius: 10px;
         border: 1px solid #e9ecef;
     }
-    .document-section:last-of-type {
+    /* .document-section:last-of-type { Se houver apenas uma, este seletor pode não ser necessário
         margin-bottom: 0;
-    }
+    } */
 
     label {
       display: flex;
@@ -141,7 +141,7 @@
       font-style: italic;
       font-weight: 400;
     }
-    .assinatura a { /* Estilo para o link na assinatura */
+    .assinatura a {
         color: inherit;
         text-decoration: none;
         cursor: pointer;
@@ -193,7 +193,7 @@
       border-radius: 10px;
       box-shadow: 0 5px 15px rgba(0,0,0,0.3);
       width: 90%; 
-      max-width: 380px; /* Max-width para social modal pode ser um pouco diferente se necessário */
+      max-width: 380px; 
       text-align: center;
       color: #333;
     }
@@ -204,7 +204,7 @@
       font-size: 1.3rem; 
     }
 
-    .modal-content p { /* Estilo para parágrafos nos modais de erro/permissão */
+    .modal-content p {
       margin-bottom: 20px; 
       line-height: 1.5;
       font-size: 0.9rem; 
@@ -213,17 +213,15 @@
 
     .modal-buttons {
       display: flex;
-      /* justify-content é space-around para cameraPermission e errorModal, e flex-end para socialModal */
       gap: 10px; 
       margin-top: 10px; 
     }
 
-    /* Ajuste para centralizar um único botão, ou alinhar à direita para múltiplos */
-    .modal-buttons.single-center {
+    .modal-buttons.single-center { /* Para centralizar botão único como no socialModal */
         justify-content: center;
     }
-     .modal-buttons.multi-right {
-        justify-content: flex-end;
+     .modal-buttons.multi-right { /* Para alinhar múltiplos botões à direita (padrão para error e camera) */
+        justify-content: space-around; /* Ou flex-end se preferir */
     }
 
 
@@ -240,33 +238,27 @@
       transition: background-color 0.2s ease;
       margin-top: 0;
       box-shadow: none;
-      border: 1px solid transparent; /* Adiciona borda base */
+      border: 1px solid transparent;
     }
     
-    /* Botões de erroModal e cameraPermissionModal */
-    #errorModal .modal-buttons button,
-    #cameraPermissionModal .modal-buttons button {
-        flex: 1; /* Para que os botões ocupem espaço igual */
-        width: auto; /* Sobrescreve width: 100% do global button */
+    /* Estilos dos botões do cameraPermissionModal e errorModal (Voltar/Cancelar) */
+    #cameraPermissionModal .modal-buttons button,
+    #errorModal .modal-buttons .cancel-btn { /* O botão Voltar do errorModal */
+        flex: 1; 
+        width: auto; 
     }
-    
-    /* Botões do socialModal (Fechar) */
-    #socialModal .modal-buttons button {
-        flex: 0 1 auto; /* Não estica, tamanho baseado no conteúdo */
+     /* Botão OK/Entendido (verde) do cameraPermissionModal */
+    #cameraPermissionModal .modal-buttons .confirm-btn {
+        background-color: #007a53;
+        color: white;
+        border-color: #007a53;
     }
-
-
-    .modal-buttons .confirm-btn { /* Estilo genérico para botões de confirmação verdes */
-      background-color: #007a53;
-      color: white;
-      border-color: #007a53;
+    #cameraPermissionModal .modal-buttons .confirm-btn:hover {
+        background-color: #006a4e;
+        border-color: #006a4e;
     }
-    .modal-buttons .confirm-btn:hover {
-      background-color: #006a4e;
-      border-color: #006a4e;
-    }
-
-    .modal-buttons .cancel-btn { /* Estilo genérico para botões de cancelar/voltar cinzas */
+    /* Botão Cancelar (cinza) do cameraPermissionModal e Voltar (cinza) do errorModal */
+    .modal-buttons .cancel-btn { 
       background-color: #e9ecef; 
       color: #333;
       border-color: #ced4da;
@@ -276,11 +268,13 @@
       border-color: #b6bfc8;
     }
 
-    /* Específico para o botão "Tentar Novamente" do errorModal do scanner */
+    /* Específico para o botão "Tentar Novamente" (amarelo) do errorModal do scanner */
     #errorModal .modal-buttons .confirm-btn { 
-        background-color: #ffb700; /* Amarelo */
+        background-color: #ffb700; 
         color: #3d2800;
         border-color: #ffb700;
+        flex:1; /* Para ocupar espaço igual ao Voltar quando ambos visíveis */
+        width: auto;
     }
     #errorModal .modal-buttons .confirm-btn:hover {
         background-color: #e6a200;
@@ -293,7 +287,7 @@
         justify-content: space-around; 
         align-items: center;
         gap: 20px; 
-        margin-top: 10px; /* Espaço acima dos ícones */
+        margin-top: 10px; 
         margin-bottom: 25px; 
         padding: 10px 0;
     }
@@ -303,17 +297,16 @@
         align-items: center;
         text-decoration: none;
         color: #004d38; 
-        font-size: 0.85rem; /* Texto menor abaixo do ícone */
+        font-size: 0.85rem; 
         transition: color 0.2s ease;
     }
     .social-icon-link:hover {
         color: #007a53; 
     }
     .social-icon-link i.fab { 
-        font-size: 2.8rem; /* Tamanho dos ícones sociais */
-        margin-bottom: 5px; /* Espaço entre ícone e texto */
+        font-size: 2.8rem; 
+        margin-bottom: 5px; 
     }
-
 
     /* --- MEDIA QUERIES PARA RESPONSIVIDADE --- */
     @media (min-width: 600px) {
@@ -329,7 +322,7 @@
         button .fa-solid { font-size: 1.1em; }
         .assinatura { margin-top: 30px; font-size: 0.85rem; }
         #qr-reader { height: 250px; margin-top: 20px; }
-        .modal-content { padding: 30px; max-width: 400px; /* Max-width maior para desktop */ }
+        .modal-content { padding: 30px; max-width: 400px; }
         .modal-content h2 { font-size: 1.5rem; margin-bottom: 20px; }
         .modal-content p { font-size: 0.95rem; margin-bottom: 25px; }
         .modal-buttons button { padding: 10px 15px; font-size: 0.95rem; }
@@ -348,7 +341,6 @@
         .modal-content h2 { font-size: 1.2rem; }
         .modal-content p { font-size: 0.85rem; }
         
-        /* Empilha botões para todos os modais em telas muito pequenas */
         #cameraPermissionModal .modal-buttons,
         #errorModal .modal-buttons,
         #socialModal .modal-buttons {
@@ -402,17 +394,19 @@
     <div class="modal-content">
       <h2 id="cameraPermTitle">Permissão da Câmera Necessária</h2>
       <p>Para escanear o código, precisamos acessar sua câmera. Por favor, clique em "Permitir" na solicitação do navegador.</p>
-      <div class="modal-buttons multi-right"> <button class="confirm-btn" id="confirmCameraAccess">Entendido</button>
+      <div class="modal-buttons multi-right"> 
+        <button class="confirm-btn" id="confirmCameraAccess">Entendido</button>
         <button class="cancel-btn" id="cancelCameraAccess">Cancelar</button>
       </div>
     </div>
   </div>
 
-  <div id="errorModal" class="modal">
+  <div id="errorModal" class="modal"> 
     <div class="modal-content">
       <h2 id="errorModalTitle">Erro na Leitura</h2>
       <p id="errorModalMessage">O conteúdo escaneado não é um código de MDF-e reconhecido.</p>
-      <div class="modal-buttons multi-right" id="errorModalButtons"> <button class="confirm-btn" id="tryAgainBtn">Tentar Novamente</button>
+      <div class="modal-buttons multi-right" id="errorModalButtonsContainer"> 
+        <button class="confirm-btn" id="tryAgainBtn">Tentar Novamente</button>
         <button class="cancel-btn" id="closeErrorModal">Voltar</button>
       </div>
     </div>
@@ -429,7 +423,9 @@
           <i class="fab fa-linkedin"></i> LinkedIn
         </a>
       </div>
-      <div class="modal-buttons single-center"> <button class="cancel-btn" id="closeSocialModalBtn">Fechar</button> </div>
+      <div class="modal-buttons single-center"> 
+        <button class="cancel-btn" id="closeSocialModalBtn">Fechar</button>
+      </div>
     </div>
   </div>
 
@@ -475,18 +471,18 @@
 
     const errorModal = document.getElementById('errorModal');
     const tryAgainBtn = document.getElementById('tryAgainBtn');
-    const closeErrorModal = document.getElementById('closeErrorModal');
-    const errorModalButtonsDiv = document.getElementById('errorModalButtons');
+    const closeErrorModal = document.getElementById('closeErrorModal'); // Botão "Voltar" que pode virar "OK"
+    const errorModalButtonsContainer = document.getElementById('errorModalButtonsContainer');
 
 
-    // Função showModal atualizada (para cameraPermissionModal e errorModal)
-    function showModal(modalElement, title, message, showTryAgainButton = false, isErrorTitle = true) {
+    // Função showModal atualizada
+    function showModal(modalElement, title, message, showTryAgainButton = false, isErrorStyle = true) {
         const modalTitleElement = modalElement.querySelector('h2');
         const modalMessageElement = modalElement.querySelector('p');
 
         if (modalTitleElement) {
             if (title) modalTitleElement.textContent = title;
-            if (isErrorTitle) {
+            if (isErrorStyle) {
                 modalTitleElement.style.color = '#dc3545'; 
             } else {
                 modalTitleElement.style.color = '#004d38'; 
@@ -496,18 +492,16 @@
 
         if (modalElement === errorModal) {
             if (tryAgainBtn) tryAgainBtn.style.display = showTryAgainButton ? 'flex' : 'none';
-            // Se "Tentar Novamente" está escondido, "Voltar" se torna o botão principal (OK)
             if (closeErrorModal) {
                 closeErrorModal.textContent = showTryAgainButton ? 'Voltar' : 'OK';
-                // A classe .cancel-btn (cinza) já está aplicada, o que corresponde ao pedido para o "OK" nesses casos.
+                // A classe .cancel-btn já é cinza, que é o desejado para o "OK" de erro simples
             }
-             // Ajusta o alinhamento dos botões no errorModal
-            if (errorModalButtonsDiv) {
-                errorModalButtonsDiv.style.justifyContent = showTryAgainButton ? 'space-around' : 'center';
+            // Ajusta o alinhamento dos botões no errorModal: centraliza se só o "OK" (antigo "Voltar") estiver visível
+            if (errorModalButtonsContainer) {
+                 errorModalButtonsContainer.style.justifyContent = showTryAgainButton ? 'space-around' : 'center';
             }
+
         } else if (modalElement === cameraPermissionModal) {
-            // Para cameraPermissionModal, os botões "Entendido" e "Cancelar" já têm seus estilos
-            // e o justify-content: space-around é o padrão.
             const cameraModalButtonsDiv = cameraPermissionModal.querySelector('.modal-buttons');
             if(cameraModalButtonsDiv) cameraModalButtonsDiv.style.justifyContent = 'space-around';
         }
@@ -520,15 +514,14 @@
         if (modalTitleElement) {
             modalTitleElement.style.color = '#004d38'; 
         }
-        // Reseta o texto do botão "Voltar" e o display do "Tentar Novamente" para o errorModal
         if (modalElement === errorModal) {
-            if (tryAgainBtn) tryAgainBtn.style.display = 'flex'; // Volta ao padrão
+            if (tryAgainBtn) tryAgainBtn.style.display = 'flex'; 
             if (closeErrorModal) closeErrorModal.textContent = 'Voltar';
-            if (errorModalButtonsDiv) errorModalButtonsDiv.style.justifyContent = 'space-around'; // Volta ao padrão
+            if (errorModalButtonsContainer) errorModalButtonsContainer.style.justifyContent = 'space-around';
         }
     }
     
-    // Consulta manual MDF-e - Usando o errorModal
+    // Consulta manual MDF-e
     const btnConsultarMdfe = document.getElementById('consultar-mdfe');
     if (btnConsultarMdfe) {
       btnConsultarMdfe.addEventListener('click', () => {
@@ -540,26 +533,26 @@
             const url = `https://dfe-portal.svrs.rs.gov.br/mdfe/qrCode?chMDFe=${chave}&tpAmb=1`;
             window.open(url, '_blank');
             input.value = '';
-          } else {
+          } else { // Erro de modelo incorreto
             showModal(errorModal, 
                       'Chave de MDF-e Inválida', 
                       `A chave inserida (modelo ${modeloDocumento}) não é de um MDF-e (modelo 58).<br>Verifique a chave.`,
-                      false, // Esconde "Tentar Novamente", "Voltar" (que virará OK) será o único botão
-                      true); 
+                      false, // FALSE para showTryAgainButton -> esconde "Tentar Novamente"
+                      true); // TRUE para isErrorStyle -> título vermelho
             input.value = ''; 
           }
-        } else {
+        } else { // Erro de comprimento da chave
           showModal(errorModal, 
                     'Chave de MDF-e Inválida', 
                     'Por favor, insira uma chave de acesso válida com 44 números.',
-                    false, // Esconde "Tentar Novamente"
-                    true); 
+                    false, // FALSE para showTryAgainButton
+                    true); // TRUE para isErrorStyle
           input.value = ''; 
         }
       });
     }
 
-    // Lógica do Social Modal (NOVO)
+    // Lógica do Social Modal
     const socialModal = document.getElementById('socialModal');
     const openSocialModalLink = document.getElementById('openSocialModalLink');
     const closeSocialModalBtn = document.getElementById('closeSocialModalBtn');
@@ -567,7 +560,7 @@
     function showSocialModal() {
         if (socialModal) {
             const titleElement = socialModal.querySelector('h2');
-            if(titleElement) titleElement.style.color = '#004d38'; // Garante cor padrão do título
+            if(titleElement) titleElement.style.color = '#004d38'; 
             socialModal.style.display = 'flex';
         }
     }
@@ -585,13 +578,11 @@
         closeSocialModalBtn.addEventListener('click', hideSocialModal);
     }
 
-    // Event listener de clique na window ATUALIZADO para incluir socialModal
     window.addEventListener('click', (event) => {
         if (event.target == cameraPermissionModal) { hideModal(cameraPermissionModal); }
         if (event.target == errorModal) { hideModal(errorModal); }
         if (event.target == socialModal) { hideSocialModal(); }
     });
-
 
     function resetToInitialState() {
         stopCamera();
@@ -761,9 +752,15 @@
             const modeloDocumento = chaveFiscal.substring(20, 22);
 
             if (modeloDocumento === '58') { // Modelo 58 é MDF-e
-                const url = `https://dfe-portal.svrs.rs.gov.br/mdfe/qrCode?chMDFe=${chaveFiscal}&tpAmb=1`;
-                window.open(url, '_blank');
                 resetToInitialState(); 
+                if (campoChaveMdfe) {
+                    campoChaveMdfe.value = chaveFiscal; 
+                }
+                showModal(errorModal, // Reutilizando errorModal para info
+                        "Chave MDF-e Pronta!",
+                        `Chave MDF-e: ${chaveFiscal}<br><br>Clique no botão "Consultar MDF-e" para abrir o portal.`,
+                        false, // Esconde "Tentar Novamente"
+                        false); // Título não vermelho (informativo)
             } else { 
                 let nomeDocumento = `Documento (modelo ${modeloDocumento})`;
                 if(modeloDocumento === '57') nomeDocumento = 'CT-e (Conhecimento de Transporte)';
