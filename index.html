@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Consulta MDF-e</title>
+  <link rel="icon" type="image/svg+xml" href='data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><defs><linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="%23004d38"/><stop offset="100%" stop-color="%23007a53"/></linearGradient></defs><path fill="url(%23grad)" d="M0 64C0 28.7 28.7 0 64 0L224 0l0 128c0 17.7 14.3 32 32 32l128 0 0 288c0 35.3-28.7 64-64 64L64 512c-35.3 0-64-28.7-64-64L0 64zm384 64l-128 0L256 0 384 128z"/></svg>'>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <script src="https://cdn.jsdelivr.net/npm/@zxing/library@0.21.3/umd/index.min.js"></script>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <div class="container">
+    <h1>Consulta MDF-e</h1>
+
+    <div class="document-section">
+      <label for="chave-mdfe">Chave do MDF-e:</label>
+      <div class="input-wrapper">
+        <i class="fa-solid fa-key"></i>
+        <input
+          type="text"
+          id="chave-mdfe"
+          name="chave-mdfe"
+          placeholder="Digite os 44 números da chave do MDF-e"
+          maxlength="44"
+          inputmode="numeric"
+          autocomplete="off"
+          spellcheck="false"
+        />
+      </div>
+      <button id="consultar-mdfe"><i class="fa-solid fa-magnifying-glass"></i>Consultar MDF-e</button>
+      <button id="scan-code" style="background-color: #007a53; color: #ffffff;"><i class="fa-solid fa-camera"></i>Escanear QR Code ou Barcode</button>
+    </div>
+
+    <div id="qr-reader" style="display: none;">
+        <video id="qr-video" autoplay playsinline></video>
+    </div>
+  </div>
+
+  <div class="assinatura">
+    <a href="#" id="openSocialModalLink">by Thalis Gomes</a>
+  </div>
+
+  <div id="cameraPermissionModal" class="modal">
+    <div class="modal-content">
+      <h2 id="cameraPermTitle">Permissão da Câmera Necessária</h2>
+      <p>Para escanear o código, precisamos acessar sua câmera. Por favor, clique em "Permitir" na solicitação do navegador.</p>
+      <div class="modal-buttons multi-right">
+        <button class="confirm-btn" id="confirmCameraAccess">Entendido</button>
+        <button class="cancel-btn" id="cancelCameraAccess">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="errorModal" class="modal">
+    <div class="modal-content">
+      <h2 id="errorModalTitle">Erro na Leitura</h2>
+      <p id="errorModalMessage">O conteúdo escaneado não é um código de MDF-e reconhecido.</p>
+      <div class="modal-buttons multi-right" id="errorModalButtonsContainer">
+        <button class="confirm-btn" id="tryAgainBtn">Tentar Novamente</button>
+        <button class="cancel-btn" id="closeErrorModal">Voltar</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="socialModal" class="modal">
+    <div class="modal-content">
+      <h2 id="socialModalTitle">Conecte-se Comigo</h2>
+      <div class="social-icons-container">
+        <a href="https://github.com/kanashiidesu" target="_blank" rel="noopener noreferrer" class="social-icon-link" title="GitHub">
+          <i class="fab fa-github"></i> GitHub
+        </a>
+        <a href="https://linkedin.com/in/thalisgomes" target="_blank" rel="noopener noreferrer" class="social-icon-link" title="LinkedIn">
+          <i class="fab fa-linkedin"></i> LinkedIn
+        </a>
+      </div>
+      <div class="modal-buttons single-center">
+        <button class="cancel-btn" id="closeSocialModalBtn">Fechar</button>
+      </div>
+    </div>
+  </div>
+
+<script src="script.js"></script>
+</body>
+</html>
